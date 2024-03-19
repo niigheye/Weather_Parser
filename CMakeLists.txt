@@ -20,6 +20,6 @@ add_definitions(${GTK4_CFLAGS_OTHER})
 # set_target_properties(aladin_practise_cur1 PROPERTIES WIN32_EXECUTABLE true)
 # target_link_libraries(aladin_practise_cur1 ${GTK4_LIBRARIES})
 
-add_executable(aladin_practise_cur1 exmaple-0.c)
+add_executable(aladin_practise_cur1 main.cpp main.h)
 target_link_libraries(aladin_practise_cur1 PRIVATE PkgConfig::GTK4)
  

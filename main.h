@@ -1,4 +1,9 @@
+#pragma once
+#include <iostream>
+#include <fstream>
 #include <gtk/gtk.h>
+
+using namespace std;
 
 static void print_hello (GtkWidget *widget, gpointer   data)
 {
@@ -46,16 +51,4 @@ static void activate (GtkApplication *app, gpointer        user_data)
   gtk_grid_attach (GTK_GRID (grid), button, 0, 1, 2, 1);
 
   gtk_window_present (GTK_WINDOW (window));
-}
-
-int main (int argc,  char **argv)
-{
-  GtkApplication *app;
-  int status;
-  app = gtk_application_new ("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
-  g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
-  status = g_application_run (G_APPLICATION (app), argc, argv);
-  g_object_unref (app);
-
-  return status;
 }
