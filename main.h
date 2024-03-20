@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <gtk/gtk.h>
+#include "libs/curl-8.6.0/include/curl/curl.h"
+// #include <curl/curl.h>
 
 using namespace std;
 

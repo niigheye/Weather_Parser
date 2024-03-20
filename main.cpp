@@ -1,13 +1,17 @@
 #include "main.h"
-
-int main(int argc,  char **argv)
+int main(int argc, char **argv)
 {
-    ifstream pass("..token.txt");
+    ifstream pass("../token.txt");
+
     string token;
+    string id = "524901";
     pass >> token;
+    string request = "http://api.openweathermap.org/data/2.5/forecast?id=" + id + "&appid=" + token;
     cout << token;
     pass.close();
-    std::cout << "Hello, from aladin_practise_cur1!\n";
+
+    CURL *curl;
+    CURLcode res;
 
     GtkApplication *app;
     int status;
