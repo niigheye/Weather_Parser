@@ -1,38 +1,28 @@
 #include "main.h"
-#include <stdio.h>
-
-#include "curl/curl.h"
-#pragma comment(lib, "curllib-bcb.lib") // Для C++Builder
-// #pragma comment(lib,"curllib.lib")    // для VC++
 int main(int argc, char **argv)
 {
-
     system("chcp 1251>nul");
-    ifstream pass("../token.txt");
-    string token;
-    string id = "524901";
-    pass >> token;
-    string request = "http://api.openweathermap.org/data/2.5/forecast?id=" + id + "&appid=" + token;
-    cout << "My request is " << request << endl;
-    cout << token;
-
-    pass.close();
+    string request;
+    createRequest(request);
+    cout << endl << request << endl;
+    //---------------------------------------------------------------------------
+    FILE *request_file = fopen(settings::request_path.c_str(),"w");
+    json data = json::parse(request_file);
 
     //---------------------------------------------------------------------------
     CURL *curl;
     CURLcode res;
-    std::string readBuffer;
 
     curl = curl_easy_init();
     if (curl)
     {
-        curl_easy_setopt(curl, CURLOPT_URL, "http://www.google.com");
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        curl_easy_setopt(curl, CURLOPT_URL, request);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, request_file);
         res = curl_easy_perform(curl);
+        if (res != CURLE_OK)
+            std::cout << "Error #" << res << " " << curl_easy_strerror(res) << std::endl;
         curl_easy_cleanup(curl);
-
-        std::cout << readBuffer << std::endl;
     }
     return 0;
 

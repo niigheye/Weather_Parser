@@ -4,9 +4,17 @@
 #include <string>
 #include <gtk/gtk.h>
 #include <curl/curl.h>
-// #include "D:\\study\\BMSTU\\practise\\PKSH_ALADIN_CUR1\\libs\\curl-8.6.0\\include\\curl\\curl.h"
-
+#include <stdio.h>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 using namespace std;
+
+namespace settings
+{
+  string request_path = "../src/request.json";
+  string token_path = "../src/token.txt";
+  string id = "524901";
+};
 
 static void print_hello(GtkWidget *widget, gpointer data)
 {
@@ -60,4 +68,27 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 {
   ((std::string *)userp)->append((char *)contents, size * nmemb);
   return size * nmemb;
+}
+
+size_t write_data( char *ptr, size_t size, size_t nmemb, FILE* data)
+{
+    return fwrite(ptr, size, nmemb, data);
+}
+
+void createRequest(string &request)
+{
+
+  ifstream pass(settings::token_path);
+  if (!pass)
+  {
+    cout << "Error: can not open the " << settings::token_path << endl;
+    return;
+  }
+  string token;
+  pass >> token;
+  request = "https://api.openweathermap.org/data/2.5/forecast?id=" + settings::id + "&appid=" + token;
+  cout << "My request is " << request << endl;
+  cout << token;
+
+  pass.close();
 }

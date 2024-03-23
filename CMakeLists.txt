@@ -17,8 +17,11 @@ set(ENV{PKG_CONFIG_PATH} "C:/msys64/mingw64/lib/pkgconf")
 include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
 find_package(CURL REQUIRED)
+find_package(nlohmann_json REQUIRED)
+ 
 pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 pkg_check_modules(CURL REQUIRED)
+pkg_check_modules(nlohmann_json REQUIRED)
  
 include_directories(${GTK4_INCLUDE_DIRS} ${CURL_INCLUDE_DIR})
 link_directories(${GTK4_LIBRARY_DIRS} ${CURL_LIBRARY})
