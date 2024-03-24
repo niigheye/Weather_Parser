@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     if (curl)
     {
 
-        curl_easy_setopt(curl, CURLOPT_URL, "http://api.openweathermap.org/data/2.5/forecast?id=547560&appid=14157351d41ee16843b6d11b64879410");
+        curl_easy_setopt(curl, CURLOPT_URL, "http://api.openweathermap.org/data/2.5/forecast?id=547560&appid=" + request::token); // баг с выгрузкой токена из файла
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, request_file);
         res = curl_easy_perform(curl);
