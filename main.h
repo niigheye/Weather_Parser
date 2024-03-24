@@ -13,8 +13,15 @@ namespace settings
 {
   string request_path = "../src/request.json";
   string token_path = "../src/token.txt";
-  string id = "524901";
 };
+
+namespace request
+{
+  string city;
+  string token;
+  string units;
+  string local;
+}
 
 static void print_hello(GtkWidget *widget, gpointer data)
 {
@@ -70,9 +77,9 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
   return size * nmemb;
 }
 
-size_t write_data( char *ptr, size_t size, size_t nmemb, FILE* data)
+size_t write_data(char *ptr, size_t size, size_t nmemb, FILE *data)
 {
-    return fwrite(ptr, size, nmemb, data);
+  return fwrite(ptr, size, nmemb, data);
 }
 
 void createRequest(string &request)
@@ -84,11 +91,17 @@ void createRequest(string &request)
     cout << "Error: can not open the " << settings::token_path << endl;
     return;
   }
-  string token;
-  pass >> token;
-  request = "https://api.openweathermap.org/data/2.5/forecast?id=" + settings::id + "&appid=" + token;
+  pass >> request::token;
+  request::city = "Moscow";
+  request::units = "metric";
+  request = string("https://api.openweathermap.org/data/2.5/forecast?"
+                   "q=" +
+                   request::city + "&units=" + request::units + "&lang=" +
+                   request::local +
+                   "&appid=" +
+                   request::token);
   cout << "My request is " << request << endl;
-  cout << token;
+  cout << request::token;
 
   pass.close();
 }

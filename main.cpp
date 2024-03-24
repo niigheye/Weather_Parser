@@ -4,19 +4,22 @@ int main(int argc, char **argv)
     system("chcp 1251>nul");
     string request;
     createRequest(request);
-    cout << endl << request << endl;
     //---------------------------------------------------------------------------
-    FILE *request_file = fopen(settings::request_path.c_str(),"w");
-    json data = json::parse(request_file);
-
+    FILE *request_file = fopen(settings::request_path.c_str(), "w");
+    if (!request_file)
+    {
+        cout << "Error: can not open the " << settings::request_path << endl;
+        return 0;
+    }
     //---------------------------------------------------------------------------
     CURL *curl;
     CURLcode res;
-
+    curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (curl)
     {
-        curl_easy_setopt(curl, CURLOPT_URL, request);
+
+        curl_easy_setopt(curl, CURLOPT_URL, "http://api.openweathermap.org/data/2.5/forecast?id=547560&appid=14157351d41ee16843b6d11b64879410");
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, request_file);
         res = curl_easy_perform(curl);
@@ -24,6 +27,17 @@ int main(int argc, char **argv)
             std::cout << "Error #" << res << " " << curl_easy_strerror(res) << std::endl;
         curl_easy_cleanup(curl);
     }
+    else
+    {
+        cout << "Error: adding curl handler";
+        return 0;
+    }
+
+    //---------------------------------------------------------------------------
+    json data = json::parse(request_file);
+
+    //---------------------------------------------------------------------------
+
     return 0;
 
     // CURL *curl;
