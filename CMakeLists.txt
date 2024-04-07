@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.28.0)
 
-project(aladin_practise_cur1 VERSION 0.1.0 LANGUAGES C CXX)
+project(PKSH_BitBot_2.0  VERSION 0.1.0 LANGUAGES C CXX)
+set(project PKSH_BitBot_2.0)
+project(${project})
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -23,11 +25,28 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 pkg_check_modules(CURL REQUIRED)
 pkg_check_modules(nlohmann_json REQUIRED)
  
-include_directories(${GTK4_INCLUDE_DIRS} ${CURL_INCLUDE_DIR})
+include_directories(${GTK4_INCLUDE_DIRS} ${CURL_INCLUDE_DIR} mvc mvc/controller mvc/view mvc/model)
 link_directories(${GTK4_LIBRARY_DIRS} ${CURL_LIBRARY})
 add_definitions(${GTK4_CFLAGS_OTHER})
 
-add_executable(aladin_practise_cur1 main.cpp main.h)
-target_link_libraries(aladin_practise_cur1 PRIVATE PkgConfig::GTK4 CURL::libcurl)
+# target_include_directories(${project} PRIVATE  mvc)
+
+file(GLOB MVC_HEADERS "mvc/*.h")
+file(GLOB MVC_CPPS "mvc/*.cpp")
+
+set(${project}_SOURCES
+main.cpp ${MVC_CPPS})
+
+set(${project}_HEADERS
+main.h ${MVC_HEADERS} mvc/observer.h)
+
+set(${project}_SOURCE_LIST
+        ${${project}_SOURCES}
+        ${${project}_HEADERS}
+        )
+
+add_executable(${project} ${${project}_SOURCE_LIST})
+
+target_link_libraries(${project} PRIVATE PkgConfig::GTK4 CURL::libcurl)
 
  

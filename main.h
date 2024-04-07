@@ -2,10 +2,17 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <stdio.h>
+
 #include <gtk/gtk.h>
 #include <curl/curl.h>
-#include <stdio.h>
 #include <nlohmann/json.hpp>
+
+#include <controller.h>
+#include <view.h>
+#include <model.h>
+
+
 using json = nlohmann::json;
 using namespace std;
 
@@ -17,10 +24,10 @@ namespace settings
 
 namespace request
 {
-  string city;
+  string city = "moscow";
   string token;
-  string units;
-  string local;
+  string units = "metric";
+  string local = "ru";
 }
 
 static void print_hello(GtkWidget *widget, gpointer data)
@@ -92,16 +99,35 @@ void createRequest(string &request)
     return;
   }
   pass >> request::token;
-  request::city = "Moscow";
-  request::units = "metric";
-  request = string("https://api.openweathermap.org/data/2.5/forecast?"
+  request = string("api.openweathermap.org/data/2.5/forecast?"
                    "q=" +
-                   request::city + "&units=" + request::units + "&lang=" +
-                   request::local +
-                   "&appid=" +
-                   request::token);
-  cout << "My request is " << request << endl;
-  cout << request::token;
-
+                   request::city +
+                   "&units=" + request::units +
+                   "&lang=" + request::local +
+                   "&appid=" + request::token);
   pass.close();
 }
+
+void putDataToFile(string buffer)
+{
+  ofstream request_file(settings::request_path.c_str());
+  if (!request_file)
+  {
+    cout << "Error: can not open the " << settings::request_path << endl;
+    return ;
+  }
+  request_file << buffer;
+  request_file.close();
+}
+
+class API{
+
+public:
+  string request;
+  json answer;
+
+  void createRequest(string &request);
+  void ParseAnsFor_today();
+  //.....
+
+};
