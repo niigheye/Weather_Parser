@@ -9,7 +9,7 @@ public:
 
 class Observable
 {
-	vector<Observer*> observers;
+	std::vector<Observer*> observers;
 
 public:
 	void AddObserver(Observer* observer)

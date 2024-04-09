@@ -25,28 +25,27 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 pkg_check_modules(CURL REQUIRED)
 pkg_check_modules(nlohmann_json REQUIRED)
  
-include_directories(${GTK4_INCLUDE_DIRS} ${CURL_INCLUDE_DIR} mvc mvc/controller mvc/view mvc/model)
-link_directories(${GTK4_LIBRARY_DIRS} ${CURL_LIBRARY})
+include_directories(${GTK4_INCLUDE_DIRS} ${CURL_INCLUDE_DIR} mvc mvc/model mvc/view  mvc/controller )
+link_directories(${GTK4_LIBRARY_DIRS} ${CURL_LIBRARY} mvc mvc/model mvc/view  mvc/controller)
 add_definitions(${GTK4_CFLAGS_OTHER})
 
-# target_include_directories(${project} PRIVATE  mvc)
 
 file(GLOB MVC_HEADERS "mvc/*.h")
 file(GLOB MVC_CPPS "mvc/*.cpp")
 
-set(${project}_SOURCES
+set(${project}_SOURCES        
 main.cpp ${MVC_CPPS})
 
 set(${project}_HEADERS
-main.h ${MVC_HEADERS} mvc/observer.h)
+${MVC_HEADERS})
 
 set(${project}_SOURCE_LIST
         ${${project}_SOURCES}
         ${${project}_HEADERS}
-        )
+)
 
 add_executable(${project} ${${project}_SOURCE_LIST})
-
-target_link_libraries(${project} PRIVATE PkgConfig::GTK4 CURL::libcurl)
+target_link_libraries(${project} PkgConfig::GTK4)
+target_link_libraries(${project} CURL::libcurl)
 
  
