@@ -3,9 +3,9 @@
 #include <string>
 #include <stdio.h>
 
-#include <weatherForecastModel.h>
-#include <appView.h>
-#include <appController.h>
+#include "mvc/model/weatherForecastModel.h"
+#include "mvc/view/appView.h"
+#include "mvc/controller/appController.h"
 
 int main(int argc, char **argv)
 {

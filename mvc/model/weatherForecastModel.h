@@ -1,7 +1,6 @@
 #pragma once
-
-#include <model.h>
-#include <observer.h>
+#include "model.h"
+#include "observer.h"
 
 #include <string>
 #include <iostream>
@@ -46,5 +45,4 @@ public:
     void m_CreateRequest();
     void m_PutDataToFile(std::string buffer);
     void m_Parse();
-
 };

@@ -1,7 +1,7 @@
 #pragma once
-#include <weatherForecastModel.h>
-#include <view.h>
-#include <observer.h>
+#include "weatherForecastModel.h"
+#include "view.h"
+#include "observer.h"
 #include <iostream>
 #include <gtk/gtk.h>
 
@@ -10,8 +10,8 @@ class AppView : public View, public Observer
     WeatherForecastModel *model;
 
 public:
-    static int argc;
-    static char **argv;
+    inline static int argc = 0;
+    inline static char **argv = nullptr;
 
     AppView(WeatherForecastModel *model);
     virtual void Update() override;

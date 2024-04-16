@@ -1,3 +1,5 @@
+#pragma once
+#include <string>
 class Model
 {
 public:
@@ -6,6 +8,6 @@ public:
 };
 namespace settings
 {
-  std::string request_path = "../src/request.json";
-  std::string token_path = "../src/token.txt";
+  inline std::string request_path = "../src/request.json";
+  inline std::string token_path = "../src/token.txt";
 };

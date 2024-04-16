@@ -25,26 +25,29 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 pkg_check_modules(CURL REQUIRED)
 pkg_check_modules(nlohmann_json REQUIRED)
  
-include_directories(${GTK4_INCLUDE_DIRS} ${CURL_INCLUDE_DIR} mvc mvc/model mvc/view  mvc/controller )
-link_directories(${GTK4_LIBRARY_DIRS} ${CURL_LIBRARY} mvc mvc/model mvc/view  mvc/controller)
+include_directories(${GTK4_INCLUDE_DIRS} ${CURL_INCLUDE_DIR} )
+link_directories(${GTK4_LIBRARY_DIRS} ${CURL_LIBRARY} )
 add_definitions(${GTK4_CFLAGS_OTHER})
 
-
-file(GLOB MVC_HEADERS "mvc/*.h")
-file(GLOB MVC_CPPS "mvc/*.cpp")
-
-set(${project}_SOURCES        
-main.cpp ${MVC_CPPS})
-
-set(${project}_HEADERS
-${MVC_HEADERS})
-
-set(${project}_SOURCE_LIST
-        ${${project}_SOURCES}
-        ${${project}_HEADERS}
+include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/mvc/model
+        ${CMAKE_CURRENT_SOURCE_DIR}/mvc/view
+        ${CMAKE_CURRENT_SOURCE_DIR}/mvc/controller
+        ${CMAKE_CURRENT_SOURCE_DIR}/mvc
 )
 
-add_executable(${project} ${${project}_SOURCE_LIST})
+set(CPP_FILES mvc/model/weatherForecastModel.cpp mvc/view/appView.cpp)
+set(H_FILES mvc/observer.h mvc/model/model.h mvc/view/view.h mvc/controller/controller.h 
+                           mvc/model/weatherForecastModel.h  mvc/view/appView.h mvc/controller/appController.h
+             )
+message(STATUS "alooo")
+message(STATUS ${CPP_FILES})
+message(STATUS ${H_FILES})
+message(STATUS "alooo")
+set (SOURCE_FILES ${CPP_FILES} ${H_FILES})
+
+add_executable(${project} main.cpp ${SOURCE_FILES})
+
 target_link_libraries(${project} PkgConfig::GTK4)
 target_link_libraries(${project} CURL::libcurl)
 
