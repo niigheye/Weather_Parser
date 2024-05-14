@@ -9,6 +9,7 @@
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 #include <gtk/gtk.h>
+#include <vector>
 
 using json = nlohmann::json;
 

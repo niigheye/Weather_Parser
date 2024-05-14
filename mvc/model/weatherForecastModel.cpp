@@ -1,5 +1,5 @@
 #include "weatherForecastModel.h"
-// ????????? ??????? ??????? Parse ? ?? ??????????? 
+// ????????? ??????? ??????? Parse ? ?? ???????????
 
 void WeatherForecastModel::m_GetForecast()
 {
@@ -90,7 +90,6 @@ void WeatherForecastModel::m_CreateRequest()
 
 void WeatherForecastModel::m_DoRequest()
 {
-
 }
 
 void WeatherForecastModel::m_PutDataToFile(std::string buffer)
@@ -147,49 +146,26 @@ size_t WeatherForecastModel::write_data(char *ptr, size_t size, size_t nmemb, FI
     return fwrite(ptr, size, nmemb, data);
 }
 
-
 GtkTreeModel *WeatherForecastModel::create_completion_model(void)
 {
-    const char *strings[] = {
-        "GNOME",
-        "gnominious",
-        "Gnomonic projection",
-        "Gnosophy",
-        "total",
-        "totally",
-        "toto",
-        "tottery",
-        "totterer",
-        "Totten trust",
-        "Tottenham hotspurs",
-        "totipotent",
-        "totipotency",
-        "totemism",
-        "totem pole",
-        "Totara",
-        "totalizer",
-        "totalizator",
-        "totalitarianism",
-        "total parenteral nutrition",
-        "total eclipse",
-        "Totipresence",
-        "Totipalmi",
-        "zombie",
-        "a?x",
-        "a?y",
-        "a?z",
-        NULL};
-    int i;
+    std::ifstream in("src/cities.txt");
+    std::string tmp;
+    std::vector<std::string> strings;  
+
+    while (std::getline(in, tmp))
+    {
+        strings.push_back(tmp); 
+    }
+    in.close();
+
     GtkListStore *store;
     GtkTreeIter iter;
-
     store = gtk_list_store_new(1, G_TYPE_STRING);
-
-    for (i = 0; strings[i]; i++)
+    
+    for (const auto& str : strings) 
     {
-        /* Append one word */
         gtk_list_store_append(store, &iter);
-        gtk_list_store_set(store, &iter, 0, strings[i], -1);
+        gtk_list_store_set(store, &iter, 0, str.c_str(), -1);  
     }
 
     return GTK_TREE_MODEL(store);
