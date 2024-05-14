@@ -1,4 +1,5 @@
 #include "weatherForecastModel.h"
+// ????????? ??????? ??????? Parse ? ?? ??????????? 
 
 void WeatherForecastModel::m_GetForecast()
 {
@@ -77,7 +78,7 @@ void WeatherForecastModel::m_CreateRequest()
         std::cout << "Error: can not open the " << settings::token_path << std::endl;
         return;
     }
-    pass >> _token;
+    pass >> this->_token; // ????? ???? ???????? ? ???????????? ????
     _request = std::string("api.openweathermap.org/data/2.5/forecast?"
                            "q=" +
                            this->m_GetCity() +
@@ -85,6 +86,11 @@ void WeatherForecastModel::m_CreateRequest()
                            "&lang=" + this->m_GetLocal() +
                            "&appid=" + this->m_GetToken());
     pass.close();
+}
+
+void WeatherForecastModel::m_DoRequest()
+{
+
 }
 
 void WeatherForecastModel::m_PutDataToFile(std::string buffer)
@@ -117,17 +123,16 @@ void WeatherForecastModel::m_Parse()
         if (res != CURLE_OK)
         {
             std::cout << "Error #" << res << " " << curl_easy_strerror(res) << std::endl;
-            return ;
+            return;
         }
         curl_easy_cleanup(curl);
-        
         m_PutDataToFile(buffer);
         m_SetAnswer(json::parse(buffer));
     }
     else
     {
         std::cout << "Error: adding curl handler";
-        return ;
+        return;
     }
 }
 
@@ -140,4 +145,52 @@ size_t WeatherForecastModel::WriteCallback(void *contents, size_t size, size_t n
 size_t WeatherForecastModel::write_data(char *ptr, size_t size, size_t nmemb, FILE *data)
 {
     return fwrite(ptr, size, nmemb, data);
+}
+
+
+GtkTreeModel *WeatherForecastModel::create_completion_model(void)
+{
+    const char *strings[] = {
+        "GNOME",
+        "gnominious",
+        "Gnomonic projection",
+        "Gnosophy",
+        "total",
+        "totally",
+        "toto",
+        "tottery",
+        "totterer",
+        "Totten trust",
+        "Tottenham hotspurs",
+        "totipotent",
+        "totipotency",
+        "totemism",
+        "totem pole",
+        "Totara",
+        "totalizer",
+        "totalizator",
+        "totalitarianism",
+        "total parenteral nutrition",
+        "total eclipse",
+        "Totipresence",
+        "Totipalmi",
+        "zombie",
+        "a?x",
+        "a?y",
+        "a?z",
+        NULL};
+    int i;
+    GtkListStore *store;
+    GtkTreeIter iter;
+
+    store = gtk_list_store_new(1, G_TYPE_STRING);
+
+    for (i = 0; strings[i]; i++)
+    {
+        /* Append one word */
+        gtk_list_store_append(store, &iter);
+        gtk_list_store_set(store, &iter, 0, strings[i], -1);
+    }
+
+    return GTK_TREE_MODEL(store);
 }
