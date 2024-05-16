@@ -1,6 +1,7 @@
 #include "weatherForecastModel.h"
 // ????????? ??????? ??????? Parse ? ?? ???????????
 
+
 void WeatherForecastModel::m_GetForecast()
 {
 }
@@ -114,7 +115,7 @@ void WeatherForecastModel::m_Parse()
     if (curl)
     {
         curl_easy_setopt(curl, CURLOPT_HTTPGET, true);
-        curl_easy_setopt(curl, CURLOPT_URL, m_GetRequest().c_str()); // баг с выгрузкой токена из файла
+        curl_easy_setopt(curl, CURLOPT_URL, m_GetRequest().c_str()); // пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
@@ -146,27 +147,52 @@ size_t WeatherForecastModel::write_data(char *ptr, size_t size, size_t nmemb, FI
     return fwrite(ptr, size, nmemb, data);
 }
 
-GtkTreeModel *WeatherForecastModel::create_completion_model(void)
+void WeatherForecastModel::ParseFileToVector(std::vector<std::string> &myvec, std::string path)
 {
-    std::ifstream in("src/cities.txt");
+    std::ifstream in(path);
     std::string tmp;
-    std::vector<std::string> strings;  
+    if (!in.is_open())
+    {
+        std::cout << "i can't open the cities.txt file((\n";
+    }
 
     while (std::getline(in, tmp))
     {
-        strings.push_back(tmp); 
+        myvec.push_back(tmp);
     }
     in.close();
+}
+
+GtkTreeModel *WeatherForecastModel::create_completion_model()
+{
+    std::vector<std::string> strings;
+    ParseFileToVector(strings, "../src/cities.txt");
 
     GtkListStore *store;
-    GtkTreeIter iter;
     store = gtk_list_store_new(1, G_TYPE_STRING);
-    
-    for (const auto& str : strings) 
+    FillGtkTree(store, strings);
+
+
+    // g_signal_connect(combobox, "changed", G_CALLBACK(on_selection_changed), NULL);
+
+    // gtk_container_add(GTK_CONTAINER(window), combobox);
+
+    // gtk_widget_show_all(window);
+    return GTK_TREE_MODEL(store);
+}
+
+// GtkWidget *WeatherForecastModel::create_tree_view()
+// {
+//     GtkWidget *tree = gtk_tree_view_new();
+//     return tree;
+// }
+
+void WeatherForecastModel::FillGtkTree(GtkListStore *store, std::vector<std::string> myvector)
+{
+    GtkTreeIter iter;
+    for (const auto &str : myvector)
     {
         gtk_list_store_append(store, &iter);
-        gtk_list_store_set(store, &iter, 0, str.c_str(), -1);  
+        gtk_list_store_set(store, &iter, 0, str.c_str(), -1);
     }
-
-    return GTK_TREE_MODEL(store);
 }

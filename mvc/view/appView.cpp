@@ -1,5 +1,21 @@
 #include "appView.h"
 
+void on_changed(GtkWidget *widget, GtkWidget *entry)
+{
+    std::cout << "\ni changed!!!!\n";
+    std::cout << gtk_editable_get_text(GTK_EDITABLE(entry));
+    // GtkTreeIter iter;
+    // GtkTreeModel *model;
+    // char *value;
+
+    // if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter))
+    // {
+    //     gtk_tree_model_get(model, &iter, LIST_ITEM, &value,  -1);
+    //     g_print("%s is selected\n", value);
+    //     g_free(value);
+    // }
+}
+
 AppView::AppView(WeatherForecastModel *model)
 {
     this->model = model;
@@ -19,11 +35,10 @@ void AppView::init_window(GtkWidget *window)
     g_object_add_weak_pointer(G_OBJECT(window), (gpointer *)&window);
 }
 
-
 void AppView::activate(GtkApplication *app, gpointer user_data)
 {
     static GtkWidget *window = NULL;
-    GtkWidget *grid;
+    static GtkWidget *grid;
     GtkWidget *button1;
     GtkWidget *button_quit;
     GtkWidget *button2;
@@ -31,7 +46,10 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     GtkWidget *label;
     GtkWidget *entry;
     GtkEntryCompletion *completion;
+    GtkWidget *tree_view;
     GtkTreeModel *completion_model;
+    GtkTreeSelection *tree_selection;
+    GtkTreeIter iter_selected;
 
     /* create a new window, and set its title */
     window = gtk_application_window_new(app);
@@ -45,23 +63,26 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     button1 = gtk_button_new_with_label("Button 1");
     button2 = gtk_button_new_with_label("Button 2");
     button_quit = gtk_button_new_with_label("Quit");
+    completion_model = WeatherForecastModel::create_completion_model();
+    tree_view = gtk_tree_view_new_with_model(completion_model);
+    tree_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
+    gtk_tree_selection_set_mode(tree_selection, GTK_SELECTION_SINGLE);
 
-
+    // std::cout << tree_selection << std::endl;
     /* Place the first button in the grid cell (0, 0), and make it fill
      * just 1 cell horizontally and vertically (ie no spanning)
      */
     gtk_grid_attach(GTK_GRID(grid), button1, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), button2, 1, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), button_quit, 0, 1, 2, 1);
+    // gtk_grid_attach(GTK_GRID(grid), combobox, 5, 5, 5, 5);
 
-    g_signal_connect(button1, "clicked", G_CALLBACK(print_hello), NULL);
-    g_signal_connect(button2, "clicked", G_CALLBACK(print_hello), NULL);
-    g_signal_connect_swapped(button_quit, "clicked", G_CALLBACK(gtk_window_destroy), window);
+    // g_signal_connect(completion_model, "changed", G_CALLBACK(on_changed), NULL);
+    // g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(on_changed), NULL);
 
     /* Place the second button in the grid cell (1, 0), and make it fill
      * just 1 cell horizontally and vertically (ie no spanning)
      */
-    
 
     /* Place the Quit button in the grid cell (0, 1), and make it
      * span 2 columns.
@@ -74,7 +95,6 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_margin_top(vbox, 18);
     gtk_widget_set_margin_bottom(vbox, 18);
     gtk_grid_attach(GTK_GRID(grid), vbox, 2, 2, 2, 1);
-
 
     /* Create our entry */
     entry = gtk_entry_new();
@@ -92,7 +112,7 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     g_object_unref(completion);
 
     /* Create a tree model and use it as the completion model */
-    completion_model = WeatherForecastModel::create_completion_model();
+
     gtk_entry_completion_set_model(completion, completion_model);
     g_object_unref(completion_model);
 
@@ -101,6 +121,13 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
 
     gtk_entry_completion_set_inline_completion(completion, TRUE);
     gtk_entry_completion_set_inline_selection(completion, TRUE);
+    gtk_entry_completion_get_popup_set_width(completion);
+        //----------------------------------------------------------------------
+        g_signal_connect(button1, "clicked", G_CALLBACK(print_hello), NULL);
+    g_signal_connect(button2, "clicked", G_CALLBACK(print_hello), NULL);
+    g_signal_connect_swapped(button_quit, "clicked", G_CALLBACK(gtk_window_destroy), window);
+    // g_signal_connect(GTK_EDITABLE(entry), "changed", G_CALLBACK(on_changed), entry);
+    g_signal_connect((completion), "match-selected", G_CALLBACK(on_changed), entry);
 
     if (!gtk_widget_get_visible(window))
         gtk_widget_set_visible(window, TRUE);
