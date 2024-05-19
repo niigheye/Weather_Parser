@@ -4,7 +4,9 @@ void on_find_clicked(GtkWidget *widget, GtkWidget *entry)
 {
     std::string res = gtk_editable_get_text(GTK_EDITABLE(entry));
     res = res.substr(0, res.find_first_of(','));
+    WeatherForecastModel::m_SetCity(res);
     std::cout << res;
+    WeatherForecastModel::m_GetForecast();
 }
 
 AppView::AppView(WeatherForecastModel *model)
@@ -13,10 +15,6 @@ AppView::AppView(WeatherForecastModel *model)
     this->model->AddObserver(this);
 }
 
-void AppView::print_hello(GtkWidget *widget, gpointer data)
-{
-    g_print("Hello World\n");
-}
 
 void AppView::init_window(GtkWidget *window)
 {
@@ -56,15 +54,7 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     tree_view = gtk_tree_view_new_with_model(completion_model);
     tree_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
     gtk_tree_selection_set_mode(tree_selection, GTK_SELECTION_SINGLE);
-//-------------------------------
-    // const char* background_file_path = "src/background.jpg";
-    // GFile* background_file = g_file_new_for_path(background_file_path);
-    // GdkTexture *background_texture = gdk_texture_new_from_file(background_file, NULL);
-
-
-    // gtk_widget_set_style(window, "background-image: url('background.jpg'); background-repeat: no-repeat; background-size: cover;");
-    
-
+//------------------------------- CSS LOGIC
 
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_path(provider, "../src/main.css");
@@ -73,10 +63,7 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
 //----------------------------------
-    // std::cout << tree_selection << std::endl;
-    /* Place the first button in the grid cell (0, 0), and make it fill
-     * just 1 cell horizontally and vertically (ie no spanning)
-     */
+
     gtk_grid_attach(GTK_GRID(grid), button_request, 0, 3, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), button_quit, 0, 1, 2, 1);
     // gtk_grid_attach(GTK_GRID(grid), background_texture, 0, 1, 2, 1);

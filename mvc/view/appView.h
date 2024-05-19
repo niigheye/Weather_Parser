@@ -7,6 +7,7 @@
 
 class AppView : public View, public Observer
 {
+private:
     WeatherForecastModel *model;
 
 public:
@@ -17,6 +18,6 @@ public:
     virtual void Update() override;
     virtual void ShowInfo() override;
     static void init_window(GtkWidget *window);
-    static void print_hello(GtkWidget *widget, gpointer data);
     static void activate(GtkApplication *app, gpointer user_data);
+    
 };

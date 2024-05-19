@@ -16,41 +16,40 @@ using json = nlohmann::json;
 class WeatherForecastModel : public Model, public Observable
 {
 private:
-    std::string _city = "moscow";
-    std::string _token = "";
-    std::string _units = "metric";
-    std::string _local = "ru";
-    std::string _request = "";
-    json _answer;
+   inline static std::string _city = "";
+   inline static std::string _token = "";
+   inline static std::string _units = "metric";
+   inline static std::string _local = "ru";
+   inline static std::string _request = "";
+   inline static json _answer;
 
 public:
-    std::string m_GetCity();
-    std::string m_GetToken();
-    std::string m_GetUnits();
-    std::string m_GetLocal();
-    std::string m_GetRequest();
-    json m_GetAnswer();
+    static std::string m_GetCity();
+    static std::string m_GetToken();
+    static std::string m_GetUnits();
+    static std::string m_GetLocal();
+    static std::string m_GetRequest();
+    static json m_GetAnswer();
 
-    void m_SetCity(std::string city);
-    void m_SetToken(std::string token);
-    void m_SetUnits(std::string units);
-    void m_SetLocal(std::string local);
-    void m_SetRequest(std::string request);
-    void m_SetAnswer(json answer);
+    static void m_SetCity(std::string city);
+    static void m_SetToken(std::string token);
+    static void m_SetUnits(std::string units);
+    static void m_SetLocal(std::string local);
+    static void m_SetRequest(std::string request);
+    static void m_SetAnswer(json answer);
 
     static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
     size_t write_data(char *ptr, size_t size, size_t nmemb, FILE *data);
 
-    void m_GetForecast();
     void Logic();
 
-    void m_CreateRequest();
-    void m_DoRequest();
-    void m_PutDataToFile(std::string buffer);
-    void m_Parse();
+    static void m_GetForecast();
+    static void m_CreateRequest();
+    static std::string m_DoRequest(std::string &buffer);
+    static void m_PutDataToFile(std::string buffer);
+    static void m_ParseToken();
 
     static GtkTreeModel *create_completion_model();
-    static GtkWidget* create_tree_view();
     static void FillGtkTree(GtkListStore *store, std::vector<std::string> myvector);
     static void ParseFileToVector(std::vector<std::string> &myvec, std::string path);
 

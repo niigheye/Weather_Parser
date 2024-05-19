@@ -1,9 +1,20 @@
 #include "weatherForecastModel.h"
 // ????????? ??????? ??????? Parse ? ?? ???????????
 
-
 void WeatherForecastModel::m_GetForecast()
 {
+    if (m_GetCity() != "") // need to validate the city
+    {
+        std::string buffer = "";
+        m_CreateRequest();
+        m_DoRequest(buffer);
+        m_PutDataToFile(buffer);
+        m_SetAnswer(json::parse(buffer));
+    }
+    else
+    {
+        std::cout << "the entry is empty";
+    }
 }
 
 std::string WeatherForecastModel::m_GetCity()
@@ -79,18 +90,50 @@ void WeatherForecastModel::m_CreateRequest()
         std::cout << "Error: can not open the " << settings::token_path << std::endl;
         return;
     }
-    pass >> this->_token; // ????? ???? ???????? ? ???????????? ????
+    std::string tmp;
+    pass >> tmp;
+    m_SetToken(tmp);
+
+    std::cout << "\ni set token to "<< m_GetToken() << std::endl;
     _request = std::string("api.openweathermap.org/data/2.5/forecast?"
                            "q=" +
-                           this->m_GetCity() +
-                           "&units=" + this->m_GetUnits() +
-                           "&lang=" + this->m_GetLocal() +
-                           "&appid=" + this->m_GetToken());
+                           m_GetCity() +
+                           "&units=" + m_GetUnits() +
+                           "&lang=" + m_GetLocal() +
+                           "&appid=" + m_GetToken());
     pass.close();
 }
 
-void WeatherForecastModel::m_DoRequest()
+std::string WeatherForecastModel::m_DoRequest(std::string &buffer)
 {
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, true);
+        curl_easy_setopt(curl, CURLOPT_URL, m_GetRequest().c_str()); // ��� � ��������� ������ �� �����
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+        res = curl_easy_perform(curl);
+        if (res != CURLE_OK)
+        {
+            std::cout << "Error #" << res << " " << curl_easy_strerror(res) << std::endl;
+        }
+        curl_easy_cleanup(curl);
+        std::cout << "i do request with\n";
+        std::cout << "city: " << m_GetCity() << std::endl;
+        std::cout << "local: " << m_GetLocal() << std::endl;
+        std::cout << "token: " << m_GetToken() << std::endl;
+        std::cout << "units: " << m_GetUnits() << std::endl;
+    }
+    else
+    {
+        std::cout << "Error: adding curl handler";
+    }
+    return buffer;
 }
 
 void WeatherForecastModel::m_PutDataToFile(std::string buffer)
@@ -105,35 +148,8 @@ void WeatherForecastModel::m_PutDataToFile(std::string buffer)
     request_file.close();
 }
 
-void WeatherForecastModel::m_Parse()
+void WeatherForecastModel::m_ParseToken()
 {
-    CURL *curl;
-    CURLcode res;
-    std::string buffer;
-    curl = curl_easy_init();
-
-    if (curl)
-    {
-        curl_easy_setopt(curl, CURLOPT_HTTPGET, true);
-        curl_easy_setopt(curl, CURLOPT_URL, m_GetRequest().c_str()); // ��� � ��������� ������ �� �����
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
-        res = curl_easy_perform(curl);
-        if (res != CURLE_OK)
-        {
-            std::cout << "Error #" << res << " " << curl_easy_strerror(res) << std::endl;
-            return;
-        }
-        curl_easy_cleanup(curl);
-        m_PutDataToFile(buffer);
-        m_SetAnswer(json::parse(buffer));
-    }
-    else
-    {
-        std::cout << "Error: adding curl handler";
-        return;
-    }
 }
 
 size_t WeatherForecastModel::WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -171,21 +187,8 @@ GtkTreeModel *WeatherForecastModel::create_completion_model()
     GtkListStore *store;
     store = gtk_list_store_new(1, G_TYPE_STRING);
     FillGtkTree(store, strings);
-
-
-    // g_signal_connect(combobox, "changed", G_CALLBACK(on_selection_changed), NULL);
-
-    // gtk_container_add(GTK_CONTAINER(window), combobox);
-
-    // gtk_widget_show_all(window);
     return GTK_TREE_MODEL(store);
 }
-
-// GtkWidget *WeatherForecastModel::create_tree_view()
-// {
-//     GtkWidget *tree = gtk_tree_view_new();
-//     return tree;
-// }
 
 void WeatherForecastModel::FillGtkTree(GtkListStore *store, std::vector<std::string> myvector)
 {
