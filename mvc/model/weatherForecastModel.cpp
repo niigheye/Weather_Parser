@@ -100,7 +100,7 @@ void WeatherForecastModel::m_CreateRequest()
                            "q=" + m_GetCity() +
                            "," + m_GetState() +
                            "&units=" + m_GetUnits() +
-                           "&cnt=" + "9" + // надо умножить спаршенное число на 8 + 1
+                           "&cnt=" + "9" + // надо умножить спаршенное число на 8n + 1
                            "&lang=" + m_GetLocal() +
                            "&appid=" + m_GetToken());
 }
