@@ -17,6 +17,7 @@ class WeatherForecastModel : public Model, public Observable
 {
 private:
    inline static std::string _city = "";
+   inline static std::string _state = "";
    inline static std::string _token = "";
    inline static std::string _units = "metric";
    inline static std::string _local = "ru";
@@ -25,6 +26,7 @@ private:
 
 public:
     static std::string m_GetCity();
+    static std::string m_GetState();
     static std::string m_GetToken();
     static std::string m_GetUnits();
     static std::string m_GetLocal();
@@ -32,6 +34,7 @@ public:
     static json m_GetAnswer();
 
     static void m_SetCity(std::string city);
+    static void m_SetState(std::string state);
     static void m_SetToken(std::string token);
     static void m_SetUnits(std::string units);
     static void m_SetLocal(std::string local);
@@ -52,5 +55,7 @@ public:
     static GtkTreeModel *create_completion_model();
     static void FillGtkTree(GtkListStore *store, std::vector<std::string> myvector);
     static void ParseFileToVector(std::vector<std::string> &myvec, std::string path);
+
+    void FilterParsedData(const json answer);
 
 };

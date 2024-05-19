@@ -22,6 +22,11 @@ std::string WeatherForecastModel::m_GetCity()
     return _city;
 }
 
+std::string WeatherForecastModel::m_GetState()
+{
+    return _state;
+}
+
 std::string WeatherForecastModel::m_GetToken()
 {
     return _token;
@@ -50,6 +55,11 @@ json WeatherForecastModel::m_GetAnswer()
 void WeatherForecastModel::m_SetCity(std::string city)
 {
     _city = city;
+}
+
+void WeatherForecastModel::m_SetState(std::string state)
+{
+    _state = state;
 }
 
 void WeatherForecastModel::m_SetToken(std::string token)
@@ -84,24 +94,15 @@ void WeatherForecastModel::Logic()
 
 void WeatherForecastModel::m_CreateRequest()
 {
-    std::ifstream pass(settings::token_path);
-    if (!pass)
-    {
-        std::cout << "Error: can not open the " << settings::token_path << std::endl;
-        return;
-    }
-    std::string tmp;
-    pass >> tmp;
-    m_SetToken(tmp);
-
-    std::cout << "\ni set token to "<< m_GetToken() << std::endl;
+    m_ParseToken();
+    // std::cout << "\ni set token to " << m_GetToken() << std::endl;
     _request = std::string("api.openweathermap.org/data/2.5/forecast?"
-                           "q=" +
-                           m_GetCity() +
+                           "q=" + m_GetCity() +
+                           "," + m_GetState() +
                            "&units=" + m_GetUnits() +
+                           "&cnt=" + "9" + // надо умножить спаршенное число на 8 + 1
                            "&lang=" + m_GetLocal() +
                            "&appid=" + m_GetToken());
-    pass.close();
 }
 
 std::string WeatherForecastModel::m_DoRequest(std::string &buffer)
@@ -128,6 +129,7 @@ std::string WeatherForecastModel::m_DoRequest(std::string &buffer)
         std::cout << "local: " << m_GetLocal() << std::endl;
         std::cout << "token: " << m_GetToken() << std::endl;
         std::cout << "units: " << m_GetUnits() << std::endl;
+        std::cout << "request: " << m_GetRequest() << std::endl;
     }
     else
     {
@@ -150,6 +152,16 @@ void WeatherForecastModel::m_PutDataToFile(std::string buffer)
 
 void WeatherForecastModel::m_ParseToken()
 {
+    std::ifstream pass(settings::token_path);
+    if (!pass)
+    {
+        std::cout << "Error: can not open the " << settings::token_path << std::endl;
+        return;
+    }
+    std::string tmp;
+    pass >> tmp;
+    m_SetToken(tmp);
+    pass.close();
 }
 
 size_t WeatherForecastModel::WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
