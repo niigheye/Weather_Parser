@@ -1,7 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <stdbool.h>
+#include <glib/gstdio.h>
 #include <stdio.h>
+#include <errno.h>
+#include <pixman.h>
 
 #include "mvc/model/weatherForecastModel.h"
 #include "mvc/view/appView.h"
@@ -23,5 +27,6 @@ int main(int argc, char **argv)
     model.m_CreateRequest();
     model.m_Parse();
     view.ShowInfo();
+
     return 0;
 }

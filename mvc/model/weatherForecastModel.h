@@ -8,6 +8,8 @@
 
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
+#include <gtk/gtk.h>
+#include <vector>
 
 using json = nlohmann::json;
 
@@ -43,6 +45,13 @@ public:
     void Logic();
 
     void m_CreateRequest();
+    void m_DoRequest();
     void m_PutDataToFile(std::string buffer);
     void m_Parse();
+
+    static GtkTreeModel *create_completion_model();
+    static GtkWidget* create_tree_view();
+    static void FillGtkTree(GtkListStore *store, std::vector<std::string> myvector);
+    static void ParseFileToVector(std::vector<std::string> &myvec, std::string path);
+
 };

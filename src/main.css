@@ -1,0 +1,21 @@
+window {
+    font-size: 20px;
+    background-image: url('../src/backround.jpg');
+    background-repeat: no-repeat; 
+    background-size: cover;
+}
+
+#find-button {
+    font-size: 30px;
+    padding: 10px;
+    border-radius: 20px;
+    font-family:'Trebuchet MS', Arial, sans-serif;
+}
+
+#quit-button {
+    font-size: 30px;
+    padding: 10px;
+    border-radius: 20px;
+    font-family:'Trebuchet MS', Arial, sans-serif;;
+}
+
