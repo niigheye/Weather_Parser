@@ -1,21 +1,36 @@
 window {
-    font-size: 20px;
     background-image: url('../src/backround.jpg');
     background-repeat: no-repeat; 
     background-size: cover;
 }
 
+
 #find-button {
     font-size: 30px;
     padding: 10px;
     border-radius: 20px;
-    font-family:'Trebuchet MS', Arial, sans-serif;
+    font-family:'Trebuchet MS', Arial, sans-serif,;
 }
 
 #quit-button {
     font-size: 30px;
     padding: 10px;
     border-radius: 20px;
-    font-family:'Trebuchet MS', Arial, sans-serif;;
+    font-family:'Trebuchet MS', Arial, sans-serif;
 }
+
+#header-label {
+    font-size: 75px;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-weight: 600;
+    color: #333333;
+}
+
+#city-label,
+#time-label {
+    font-size: 40px;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+}
+
+
 
