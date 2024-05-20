@@ -1,12 +1,30 @@
 #include "weatherForecastModel.h"
+// ????????? ??????? ??????? Parse ? ?? ???????????
 
 void WeatherForecastModel::m_GetForecast()
 {
+    if (m_GetCity() != "") // need to validate the city
+    {
+        std::string buffer = "";
+        m_CreateRequest();
+        m_DoRequest(buffer);
+        m_PutDataToFile(buffer);
+        m_SetAnswer(json::parse(buffer));
+    }
+    else
+    {
+        std::cout << "the entry is empty";
+    }
 }
 
 std::string WeatherForecastModel::m_GetCity()
 {
     return _city;
+}
+
+std::string WeatherForecastModel::m_GetState()
+{
+    return _state;
 }
 
 std::string WeatherForecastModel::m_GetToken()
@@ -37,6 +55,11 @@ json WeatherForecastModel::m_GetAnswer()
 void WeatherForecastModel::m_SetCity(std::string city)
 {
     _city = city;
+}
+
+void WeatherForecastModel::m_SetState(std::string state)
+{
+    _state = state;
 }
 
 void WeatherForecastModel::m_SetToken(std::string token)
@@ -71,20 +94,48 @@ void WeatherForecastModel::Logic()
 
 void WeatherForecastModel::m_CreateRequest()
 {
-    std::ifstream pass(settings::token_path);
-    if (!pass)
-    {
-        std::cout << "Error: can not open the " << settings::token_path << std::endl;
-        return;
-    }
-    pass >> _token;
+    m_ParseToken();
+    // std::cout << "\ni set token to " << m_GetToken() << std::endl;
     _request = std::string("api.openweathermap.org/data/2.5/forecast?"
-                           "q=" +
-                           this->m_GetCity() +
-                           "&units=" + this->m_GetUnits() +
-                           "&lang=" + this->m_GetLocal() +
-                           "&appid=" + this->m_GetToken());
-    pass.close();
+                           "q=" + m_GetCity() +
+                           "," + m_GetState() +
+                           "&units=" + m_GetUnits() +
+                           "&cnt=" + "9" + // РЅР°РґРѕ СѓРјРЅРѕР¶РёС‚СЊ СЃРїР°СЂС€РµРЅРЅРѕРµ С‡РёСЃР»Рѕ РЅР° 8 + 1
+                           "&lang=" + m_GetLocal() +
+                           "&appid=" + m_GetToken());
+}
+
+std::string WeatherForecastModel::m_DoRequest(std::string &buffer)
+{
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, true);
+        curl_easy_setopt(curl, CURLOPT_URL, m_GetRequest().c_str()); // пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+        res = curl_easy_perform(curl);
+        if (res != CURLE_OK)
+        {
+            std::cout << "Error #" << res << " " << curl_easy_strerror(res) << std::endl;
+        }
+        curl_easy_cleanup(curl);
+        std::cout << "i do request with\n";
+        std::cout << "city: " << m_GetCity() << std::endl;
+        std::cout << "local: " << m_GetLocal() << std::endl;
+        std::cout << "token: " << m_GetToken() << std::endl;
+        std::cout << "units: " << m_GetUnits() << std::endl;
+        std::cout << "request: " << m_GetRequest() << std::endl;
+    }
+    else
+    {
+        std::cout << "Error: adding curl handler";
+    }
+    return buffer;
 }
 
 void WeatherForecastModel::m_PutDataToFile(std::string buffer)
@@ -99,36 +150,18 @@ void WeatherForecastModel::m_PutDataToFile(std::string buffer)
     request_file.close();
 }
 
-void WeatherForecastModel::m_Parse()
+void WeatherForecastModel::m_ParseToken()
 {
-    CURL *curl;
-    CURLcode res;
-    std::string buffer;
-    curl = curl_easy_init();
-
-    if (curl)
+    std::ifstream pass(settings::token_path);
+    if (!pass)
     {
-        curl_easy_setopt(curl, CURLOPT_HTTPGET, true);
-        curl_easy_setopt(curl, CURLOPT_URL, m_GetRequest().c_str()); // баг с выгрузкой токена из файла
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
-        res = curl_easy_perform(curl);
-        if (res != CURLE_OK)
-        {
-            std::cout << "Error #" << res << " " << curl_easy_strerror(res) << std::endl;
-            return ;
-        }
-        curl_easy_cleanup(curl);
-        
-        m_PutDataToFile(buffer);
-        m_SetAnswer(json::parse(buffer));
+        std::cout << "Error: can not open the " << settings::token_path << std::endl;
+        return;
     }
-    else
-    {
-        std::cout << "Error: adding curl handler";
-        return ;
-    }
+    std::string tmp;
+    pass >> tmp;
+    m_SetToken(tmp);
+    pass.close();
 }
 
 size_t WeatherForecastModel::WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -140,4 +173,41 @@ size_t WeatherForecastModel::WriteCallback(void *contents, size_t size, size_t n
 size_t WeatherForecastModel::write_data(char *ptr, size_t size, size_t nmemb, FILE *data)
 {
     return fwrite(ptr, size, nmemb, data);
+}
+
+void WeatherForecastModel::ParseFileToVector(std::vector<std::string> &myvec, std::string path)
+{
+    std::ifstream in(path);
+    std::string tmp;
+    if (!in.is_open())
+    {
+        std::cout << "i can't open the cities.txt file((\n";
+    }
+
+    while (std::getline(in, tmp))
+    {
+        myvec.push_back(tmp);
+    }
+    in.close();
+}
+
+GtkTreeModel *WeatherForecastModel::create_completion_model()
+{
+    std::vector<std::string> strings;
+    ParseFileToVector(strings, "../src/cities.txt");
+
+    GtkListStore *store;
+    store = gtk_list_store_new(1, G_TYPE_STRING);
+    FillGtkTree(store, strings);
+    return GTK_TREE_MODEL(store);
+}
+
+void WeatherForecastModel::FillGtkTree(GtkListStore *store, std::vector<std::string> myvector)
+{
+    GtkTreeIter iter;
+    for (const auto &str : myvector)
+    {
+        gtk_list_store_append(store, &iter);
+        gtk_list_store_set(store, &iter, 0, str.c_str(), -1);
+    }
 }
