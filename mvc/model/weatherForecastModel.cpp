@@ -97,7 +97,8 @@ void WeatherForecastModel::m_CreateRequest()
     m_ParseToken();
     // std::cout << "\ni set token to " << m_GetToken() << std::endl;
     _request = std::string("api.openweathermap.org/data/2.5/forecast?"
-                           "q=" + m_GetCity() +
+                           "q=" +
+                           m_GetCity() +
                            "," + m_GetState() +
                            "&units=" + m_GetUnits() +
                            "&cnt=" + "9" + // надо умножить спаршенное число на 8n + 1
@@ -191,18 +192,26 @@ void WeatherForecastModel::ParseFileToVector(std::vector<std::string> &myvec, st
     in.close();
 }
 
-GtkTreeModel *WeatherForecastModel::create_completion_model()
+GtkTreeModel *WeatherForecastModel::CreateCompletionModelCity()
 {
     std::vector<std::string> strings;
     ParseFileToVector(strings, "../src/cities.txt");
 
     GtkListStore *store;
     store = gtk_list_store_new(1, G_TYPE_STRING);
-    FillGtkTree(store, strings);
+    FillGtkTreeCity(store, strings);
     return GTK_TREE_MODEL(store);
 }
 
-void WeatherForecastModel::FillGtkTree(GtkListStore *store, std::vector<std::string> myvector)
+GtkTreeModel *WeatherForecastModel::CreateCompletionModelPeriod()
+{
+    GtkListStore *store;
+    store = gtk_list_store_new(1, G_TYPE_STRING);
+    FillGtkTreePeriod(store);
+    return GTK_TREE_MODEL(store); //
+}
+
+void WeatherForecastModel::FillGtkTreeCity(GtkListStore *store, std::vector<std::string> myvector)
 {
     GtkTreeIter iter;
     for (const auto &str : myvector)
@@ -210,4 +219,15 @@ void WeatherForecastModel::FillGtkTree(GtkListStore *store, std::vector<std::str
         gtk_list_store_append(store, &iter);
         gtk_list_store_set(store, &iter, 0, str.c_str(), -1);
     }
+}
+
+void WeatherForecastModel::FillGtkTreePeriod(GtkListStore *store)
+{
+    GtkTreeIter iter;
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "1 день", -1);
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "3 дня", -1);
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "5 дней", -1);
 }
