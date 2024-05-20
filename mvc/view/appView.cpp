@@ -3,15 +3,18 @@
 void on_find_clicked(GtkWidget *widget, GtkWidget *entry)
 {
     std::string res = gtk_editable_get_text(GTK_EDITABLE(entry));
+    if (res == "")
+        return;
+
     int pos = res.find_first_of(',');
     std::string city = res.substr(0, pos);
     std::string state = res.substr(pos + 2, res.length() - pos);
-    if (!(city == WeatherForecastModel::m_GetCity() && state == WeatherForecastModel::m_GetState()))
-    {
-        WeatherForecastModel::m_SetCity(city);
-        WeatherForecastModel::m_SetState(state);
-        WeatherForecastModel::m_GetForecast();
-    }
+    if ((city == WeatherForecastModel::m_GetCity()) && (state == WeatherForecastModel::m_GetState()))
+        return;
+
+    WeatherForecastModel::m_SetCity(city);
+    WeatherForecastModel::m_SetState(state);
+    WeatherForecastModel::m_GetForecast();
 }
 
 AppView::AppView(WeatherForecastModel *model)
@@ -28,6 +31,14 @@ void AppView::init_window(GtkWidget *window)
     g_object_add_weak_pointer(G_OBJECT(window), (gpointer *)&window);
 }
 
+void AppView::StyleBox(GtkWidget *vbox)
+{
+    gtk_widget_set_margin_start(vbox, 18);
+    gtk_widget_set_margin_end(vbox, 18);
+    gtk_widget_set_margin_top(vbox, 18);
+    gtk_widget_set_margin_bottom(vbox, 18);
+}
+
 void AppView::activate(GtkApplication *app, gpointer user_data)
 {
     static GtkWidget *window = NULL;
@@ -40,15 +51,10 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     GtkEntryCompletion *completion_city;
     GtkWidget *tree_view_city;
     GtkTreeModel *completion_model_city;
-    GtkTreeSelection *tree_selection_city;
     GtkTreeIter iter_selected_city;
 
-    GtkWidget *entry_period;
-    GtkEntryCompletion *completion_period;
     GtkWidget *tree_view_period;
     GtkTreeModel *completion_model_period;
-    GtkTreeSelection *tree_selection_period;
-    GtkTreeIter iter_selected_period;
 
     GtkTreeIter iter;
     GtkListStore *liststore;
@@ -57,30 +63,24 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     /* create a new window, and set its title */
     window = gtk_application_window_new(app);
     init_window(window);
-    /* Here we construct the container that is going pack our buttons */
     grid = gtk_grid_new();
-
-    /* Pack the container in the window */
     gtk_window_set_child(GTK_WINDOW(window), grid);
 
     button_request = gtk_button_new_with_label("find");
     button_quit = gtk_button_new_with_label("Quit");
     completion_model_city = WeatherForecastModel::CreateCompletionModelCity();
-    completion_model_period = WeatherForecastModel::CreateCompletionModelPeriod();
-
-    liststore = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-    gtk_list_store_insert_with_values(liststore, NULL, -1, 1, "1 day", -1);
-    gtk_list_store_insert_with_values(liststore, NULL, -1, 1, "3 days", -1);
-    gtk_list_store_insert_with_values(liststore, NULL, -1, 1, "5 days", -1);
+    liststore = WeatherForecastModel::CreateListStorePeriod();
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(liststore));
-    g_object_unref(liststore);
     column = gtk_cell_renderer_text_new();
+    vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
+    entry_city = gtk_entry_new();
+    tree_view_city = gtk_tree_view_new_with_model(completion_model_city);
+    completion_city = gtk_entry_completion_new();
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+
+    g_object_unref(liststore);
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), column, TRUE);
     gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), column, "cell-background", 0, "text", 1, NULL);
-
-    tree_view_city = gtk_tree_view_new_with_model(completion_model_city);
-    tree_selection_city = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view_city));
-    gtk_tree_selection_set_mode(tree_selection_city, GTK_SELECTION_SINGLE);
 
     //------------------------------- CSS LOGIC
 
@@ -90,31 +90,19 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     GtkStyleContext *context = gtk_widget_get_style_context(window);
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-    //----------------------------------
-
     //--------------------------------------
-    vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
-    gtk_widget_set_margin_start(vbox, 18);
-    gtk_widget_set_margin_end(vbox, 18);
-    gtk_widget_set_margin_top(vbox, 18);
-    gtk_widget_set_margin_bottom(vbox, 18);
-
+    StyleBox(vbox);
     gtk_grid_attach(GTK_GRID(grid), button_request, 0, 3, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), button_quit, 0, 1, 2, 1);
-    // gtk_grid_attach(GTK_GRID(grid), combo, 5, 5, 5, 1);
     gtk_grid_attach(GTK_GRID(grid), vbox, 28, 2, 2, 1);
 
     /* Create our entry */
-    entry_city = gtk_entry_new();
     gtk_box_append(GTK_BOX(vbox), entry_city);
     gtk_box_append(GTK_BOX(vbox), combo);
 
     gtk_accessible_update_property(GTK_ACCESSIBLE(entry_city),
                                    GTK_ACCESSIBLE_PROPERTY_AUTOCOMPLETE, GTK_ACCESSIBLE_AUTOCOMPLETE_LIST,
                                    -1);
-    /* Create the completion object */
-    completion_city = gtk_entry_completion_new();
-    completion_period = gtk_entry_completion_new();
 
     /* Assign the completion to the entry */
     gtk_entry_set_completion(GTK_ENTRY(entry_city), completion_city);

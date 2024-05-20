@@ -53,11 +53,9 @@ public:
     static void m_ParseToken();
 
     static GtkTreeModel *CreateCompletionModelCity();
-    static GtkTreeModel *CreateCompletionModelPeriod();
+    static GtkListStore *CreateListStorePeriod();
     static void FillGtkTreeCity(GtkListStore *store, std::vector<std::string> myvector);
     static void FillGtkTreePeriod(GtkListStore *store);
     static void ParseFileToVector(std::vector<std::string> &myvec, std::string path);
-
-    void FilterParsedData(const json answer);
 
 };

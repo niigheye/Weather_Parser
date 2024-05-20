@@ -18,6 +18,7 @@ public:
     virtual void Update() override;
     virtual void ShowInfo() override;
     static void init_window(GtkWidget *window);
+    static void StyleBox(GtkWidget *vbox);
     static void activate(GtkApplication *app, gpointer user_data);
     
 };

@@ -1,5 +1,4 @@
 #include "weatherForecastModel.h"
-// ????????? ??????? ??????? Parse ? ?? ???????????
 
 void WeatherForecastModel::m_GetForecast()
 {
@@ -84,7 +83,10 @@ void WeatherForecastModel::m_SetRequest(std::string request)
 
 void WeatherForecastModel::m_SetAnswer(json answer)
 {
-    _answer = answer;
+    if (answer.at("cod") != "200"){
+        std::cout << answer.at("message");
+    }
+        _answer = answer;
 }
 
 void WeatherForecastModel::Logic()
@@ -203,12 +205,12 @@ GtkTreeModel *WeatherForecastModel::CreateCompletionModelCity()
     return GTK_TREE_MODEL(store);
 }
 
-GtkTreeModel *WeatherForecastModel::CreateCompletionModelPeriod()
+GtkListStore *WeatherForecastModel::CreateListStorePeriod()
 {
     GtkListStore *store;
-    store = gtk_list_store_new(1, G_TYPE_STRING);
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
     FillGtkTreePeriod(store);
-    return GTK_TREE_MODEL(store); //
+    return store; //
 }
 
 void WeatherForecastModel::FillGtkTreeCity(GtkListStore *store, std::vector<std::string> myvector)
@@ -223,11 +225,7 @@ void WeatherForecastModel::FillGtkTreeCity(GtkListStore *store, std::vector<std:
 
 void WeatherForecastModel::FillGtkTreePeriod(GtkListStore *store)
 {
-    GtkTreeIter iter;
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "1 день", -1);
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "3 дня", -1);
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "5 дней", -1);
+    gtk_list_store_insert_with_values(store, NULL, -1, 1, "1 day", -1);
+    gtk_list_store_insert_with_values(store, NULL, -1, 1, "3 days", -1);
+    gtk_list_store_insert_with_values(store, NULL, -1, 1, "5 days", -1);
 }
