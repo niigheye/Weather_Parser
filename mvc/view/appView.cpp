@@ -247,11 +247,11 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     // Simulate loading forecast data from a JSON file
 
     GtkWidget *forecast_grid = gtk_grid_new();
-
+    gtk_grid_attach(GTK_GRID(grid),forecast_grid,-1,8,4,4 );
     std::ifstream ifs("../src/request.json");
     json forecast_data = json::parse(ifs);
     display_weather_forecast(forecast_box, forecast_data,forecast_grid);
-    gtk_grid_attach(GTK_GRID(grid),forecast_grid,0,0,1,1 );
+    
 }
 
 void AppView::display_weather_forecast(GtkWidget *container, const json &forecast_data,GtkWidget *forecast_grid)
@@ -265,7 +265,7 @@ void AppView::display_weather_forecast(GtkWidget *container, const json &forecas
     {
         const auto &day = forecast_data["list"][i];
 
-        GtkWidget *date_label = gtk_label_new(day["dt"].get<std::string>().c_str());
+        GtkWidget *date_label = gtk_label_new(day["dt_txt"].get<std::string>().c_str());
         GtkWidget *icon_image = gtk_image_new_from_file((day["weather"][0]["icon"].get<std::string>() + ".png").c_str());
         std::string temp_text = std::to_string(day["main"]["temp_min"].get<float>()) + " / " + std::to_string(day["main"]["temp_max"].get<float>());
         GtkWidget *temp_label = gtk_label_new(temp_text.c_str());
