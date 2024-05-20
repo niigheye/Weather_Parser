@@ -18,7 +18,8 @@ public:
     virtual void Update() override;
     virtual void ShowInfo() override;
     static void init_window(GtkWidget *window);
+
+    static void StyleBox(GtkWidget *vbox);
     static void activate(GtkApplication *app, gpointer user_data);
-    //static void display_weather_forecast(GtkWidget *container, const json &forecast_data,GtkWidget *forecast_grid);
     static void display_weather_forecast(GtkWidget *forecast_grid, const json &forecast_data);
 };

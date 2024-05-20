@@ -51,11 +51,10 @@ public:
     static std::string m_DoRequest(std::string &buffer);
     static void m_PutDataToFile(std::string buffer);
     static void m_ParseToken();
-
-    static GtkTreeModel *create_completion_model();
-    static void FillGtkTree(GtkListStore *store, std::vector<std::string> myvector);
+    
+    static GtkTreeModel *CreateCompletionModelCity();
+    static GtkListStore *CreateListStorePeriod();
+    static void FillGtkTreeCity(GtkListStore *store, std::vector<std::string> myvector);
+    static void FillGtkTreePeriod(GtkListStore *store);
     static void ParseFileToVector(std::vector<std::string> &myvec, std::string path);
-
-    void FilterParsedData(const json answer);
-
 };
