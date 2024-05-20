@@ -23,4 +23,5 @@ public:
     static void display_weather_forecast_5(GtkWidget *forecast_grid, const json &forecast_data);
     static void display_weather_forecast_3(GtkWidget *forecast_grid, const json &forecast_data);
     static void display_weather_forecast_1(GtkWidget *forecast_grid, const json &forecast_data);
+    static void display_static_weather_details_1(GtkWidget *details_box, const json &forecast_data);
 };

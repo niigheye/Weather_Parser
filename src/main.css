@@ -54,6 +54,19 @@ window {
     margin-top: 5px;
 }
 
-
+#pressure-label,
+#humidity-label,
+#feels-like-label,
+#weather-desc-label,
+#wind-speed-label{
+    font-size: 40px;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom:150px;
+    margin-top:50px;
+    margin-left:60px;
+    margin-right:60px;
+}
 
 
