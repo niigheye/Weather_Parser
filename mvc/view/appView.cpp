@@ -398,6 +398,7 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_name(header_label, "header-label");
     gtk_widget_set_halign(header_label, GTK_ALIGN_CENTER);
     gtk_box_append(GTK_BOX(header_box), header_label);
+    //gtk_widget_set_margin_start(header_label, -40);
     
 
     GtkWidget *grid = gtk_grid_new();
@@ -478,62 +479,188 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     context = gtk_widget_get_style_context(window);
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
+//-------- для 3,5
+    // GtkWidget *forecast_grid = gtk_grid_new();
+    // gtk_grid_set_column_homogeneous(GTK_GRID(forecast_grid), TRUE);
+    // gtk_grid_set_row_homogeneous(GTK_GRID(forecast_grid), TRUE);
+    // gtk_grid_set_row_spacing(GTK_GRID(forecast_grid), 10);
+    // gtk_grid_set_column_spacing(GTK_GRID(forecast_grid), 10);
+    // gtk_box_append(GTK_BOX(main_vbox), forecast_grid);
+    
+//-------- для 1
+ // Добавление области с прокруткой для forecast_grid
+    GtkWidget *overlay = gtk_overlay_new();
+    gtk_box_append(GTK_BOX(main_vbox), overlay);
+
+    GtkWidget *forecast_scrolled_window = gtk_scrolled_window_new();
+    gtk_widget_set_vexpand(forecast_scrolled_window, TRUE);
+    gtk_widget_set_hexpand(forecast_scrolled_window, TRUE);
+    gtk_overlay_set_child(GTK_OVERLAY(overlay), forecast_scrolled_window);
+
     GtkWidget *forecast_grid = gtk_grid_new();
     gtk_grid_set_column_homogeneous(GTK_GRID(forecast_grid), TRUE);
     gtk_grid_set_row_homogeneous(GTK_GRID(forecast_grid), TRUE);
     gtk_grid_set_row_spacing(GTK_GRID(forecast_grid), 10);
     gtk_grid_set_column_spacing(GTK_GRID(forecast_grid), 10);
-    gtk_box_append(GTK_BOX(main_vbox), forecast_grid);
+    gtk_widget_set_name(forecast_grid, "forecast-grid");
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(forecast_scrolled_window), forecast_grid);
 
     // Загрузка данных и отображение прогноза
     std::ifstream ifs("../src/request.json");
     json forecast_data = json::parse(ifs);
-    display_weather_forecast(forecast_grid, forecast_data);
+    //display_weather_forecast_5(forecast_grid, forecast_data);
+    //display_weather_forecast_3(forecast_grid, forecast_data);
+    display_weather_forecast_1(forecast_grid, forecast_data);
 
     gtk_window_present(GTK_WINDOW(window));
 }
-
-void AppView::display_weather_forecast(GtkWidget *forecast_grid, const json &forecast_data)
+//------------------------------ приописываем вывод для 1 дня
+void AppView::display_weather_forecast_1(GtkWidget *forecast_grid, const json &forecast_data)
 {
-    int row = 0;
-    for (size_t i = 0; i < 40; i += 8)
+    int column = 0;
+    GtkWidget *times_row = gtk_grid_new();
+    GtkWidget *icon_row = gtk_grid_new();
+    GtkWidget *temp_row = gtk_grid_new();
+
+    gtk_grid_set_row_spacing(GTK_GRID(times_row), 117);
+    gtk_grid_set_column_spacing(GTK_GRID(times_row), 180);
+    gtk_grid_set_row_spacing(GTK_GRID(icon_row), 5);
+    gtk_grid_set_column_spacing(GTK_GRID(icon_row), 212);
+    gtk_grid_set_row_spacing(GTK_GRID(temp_row), 30);
+    gtk_grid_set_column_spacing(GTK_GRID(temp_row), 196);
+
+    for (size_t i = 0; i < 9; i += 1)
     {
         const auto &day = forecast_data["list"][i];
 
         std::string dt_txt = day["dt_txt"].get<std::string>();
-        std::string month_date = dt_txt.substr(5, 5); 
-        GtkWidget *date_label = gtk_label_new(month_date.c_str());
-        gtk_widget_set_name(date_label, "date-label");
+        std::string time = dt_txt.substr(11, 5);
+
+        std::string temp_text = std::to_string(day["main"]["temp"].get<int>()) + "°C";
 
         std::string icon_path = "../src/icons/" + day["weather"][0]["icon"].get<std::string>() + ".png";
         GtkWidget *icon_image = gtk_image_new_from_file(icon_path.c_str());
-        gtk_widget_set_name(icon_image, "icon-image");
-        gtk_widget_set_size_request(icon_image, 80, 80);
+        gtk_widget_set_size_request(icon_image, 100, 100);
+        gtk_widget_set_margin_start(icon_image, 35);
+       
 
-        std::string temp_text = std::to_string(day["main"]["temp_min"].get<int>()) + "°" + " / " + std::to_string(day["main"]["temp_max"].get<int>()) + "°";
+        GtkWidget *times_label = gtk_label_new(time.c_str());
+        gtk_widget_set_name(times_label, "times-label");
+
         GtkWidget *temp_label = gtk_label_new(temp_text.c_str());
         gtk_widget_set_name(temp_label, "temp-label");
 
-        GtkCssProvider *provider1 = gtk_css_provider_new();
-        gtk_css_provider_load_from_path(provider1, "../src/main.css");
+        GtkCssProvider *provider = gtk_css_provider_new();
+        gtk_css_provider_load_from_path(provider, "../src/main.css");
 
-        GtkStyleContext *context1;
-        context1 = gtk_widget_get_style_context(date_label);
-        gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+        GtkStyleContext *context;
+        context = gtk_widget_get_style_context(times_label);
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-        context1 = gtk_widget_get_style_context(icon_image);
-        gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+        context = gtk_widget_get_style_context(icon_image);
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-        context1 = gtk_widget_get_style_context(temp_label);
-        gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+        context = gtk_widget_get_style_context(temp_label);
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-        gtk_grid_attach(GTK_GRID(forecast_grid), date_label, 0, row, 1, 1);
-        gtk_grid_attach(GTK_GRID(forecast_grid), icon_image, 1, row, 1, 1);
-        gtk_grid_attach(GTK_GRID(forecast_grid), temp_label, 2, row, 1, 1);
+        gtk_grid_attach(GTK_GRID(times_row), times_label, column, 0, 1, 2);
+        gtk_grid_attach(GTK_GRID(icon_row), icon_image, column, 0, 1, 2);
+        gtk_grid_attach(GTK_GRID(temp_row), temp_label, column, 0, 1, 2);
 
-        row++;
+        column++;
     }
+
+    gtk_grid_attach(GTK_GRID(forecast_grid), times_row, 0, 0, 2, 3);
+    gtk_grid_attach(GTK_GRID(forecast_grid), icon_row, 0, 1, 2, 3);
+    gtk_grid_attach(GTK_GRID(forecast_grid), temp_row, 0, 2, 2, 3);
 }
+//------------------------------- прописываем вывод 5 дней
+
+// void AppView::display_weather_forecast_5(GtkWidget *forecast_grid, const json &forecast_data)
+// {
+//     int row = 0;
+//     for (size_t i = 0; i < 40; i += 8)
+//     {
+//         const auto &day = forecast_data["list"][i];
+
+//         std::string dt_txt = day["dt_txt"].get<std::string>();
+//         std::string month_date = dt_txt.substr(5, 5); 
+//         GtkWidget *date_label = gtk_label_new(month_date.c_str());
+//         gtk_widget_set_name(date_label, "date-label");
+
+//         std::string icon_path = "../src/icons/" + day["weather"][0]["icon"].get<std::string>() + ".png";
+//         GtkWidget *icon_image = gtk_image_new_from_file(icon_path.c_str());
+//         gtk_widget_set_name(icon_image, "icon-image");
+//         gtk_widget_set_size_request(icon_image, 80, 80);
+
+//         std::string temp_text = std::to_string(day["main"]["temp_min"].get<int>()) + "°" + " / " + std::to_string(day["main"]["temp_max"].get<int>()) + "°";
+//         GtkWidget *temp_label = gtk_label_new(temp_text.c_str());
+//         gtk_widget_set_name(temp_label, "temp-label");
+
+//         GtkCssProvider *provider1 = gtk_css_provider_new();
+//         gtk_css_provider_load_from_path(provider1, "../src/main.css");
+
+//         GtkStyleContext *context1;
+//         context1 = gtk_widget_get_style_context(date_label);
+//         gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+//         context1 = gtk_widget_get_style_context(icon_image);
+//         gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+//         context1 = gtk_widget_get_style_context(temp_label);
+//         gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+//         gtk_grid_attach(GTK_GRID(forecast_grid), date_label, 0, row, 1, 1);
+//         gtk_grid_attach(GTK_GRID(forecast_grid), icon_image, 1, row, 1, 1);
+//         gtk_grid_attach(GTK_GRID(forecast_grid), temp_label, 2, row, 1, 1);
+
+//         row++;
+//     }
+// }
+
+//---------------------------------------------прописываем вывод 3 дней
+
+// void AppView::display_weather_forecast_3(GtkWidget *forecast_grid, const json &forecast_data)
+// {
+//     int row = 0;
+//     for (size_t i = 0; i < 24; i += 8)
+//     {
+//         const auto &day = forecast_data["list"][i];
+
+//         std::string dt_txt = day["dt_txt"].get<std::string>();
+//         std::string month_date = dt_txt.substr(5, 5); 
+//         GtkWidget *date_label = gtk_label_new(month_date.c_str());
+//         gtk_widget_set_name(date_label, "date-label");
+
+//         std::string icon_path = "../src/icons/" + day["weather"][0]["icon"].get<std::string>() + ".png";
+//         GtkWidget *icon_image = gtk_image_new_from_file(icon_path.c_str());
+//         gtk_widget_set_name(icon_image, "icon-image");
+//         gtk_widget_set_size_request(icon_image, 80, 80);
+
+//         std::string temp_text = std::to_string(day["main"]["temp_min"].get<int>()) + "°" + " / " + std::to_string(day["main"]["temp_max"].get<int>()) + "°";
+//         GtkWidget *temp_label = gtk_label_new(temp_text.c_str());
+//         gtk_widget_set_name(temp_label, "temp-label");
+
+//         GtkCssProvider *provider1 = gtk_css_provider_new();
+//         gtk_css_provider_load_from_path(provider1, "../src/main.css");
+
+//         GtkStyleContext *context1;
+//         context1 = gtk_widget_get_style_context(date_label);
+//         gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+//         context1 = gtk_widget_get_style_context(icon_image);
+//         gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+//         context1 = gtk_widget_get_style_context(temp_label);
+//         gtk_style_context_add_provider(context1, GTK_STYLE_PROVIDER(provider1), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+//         gtk_grid_attach(GTK_GRID(forecast_grid), date_label, 0, row, 1, 1);
+//         gtk_grid_attach(GTK_GRID(forecast_grid), icon_image, 1, row, 1, 1);
+//         gtk_grid_attach(GTK_GRID(forecast_grid), temp_label, 2, row, 1, 1);
+
+//         row++;
+//     }
+// }
 
 void AppView::Update()
 {

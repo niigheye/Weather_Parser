@@ -136,6 +136,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
+
+/CMakeLists.txt
 ### CMake Patch ###
 # External projects
 *-prefix/

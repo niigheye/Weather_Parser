@@ -11,7 +11,7 @@ set(CURL_INCLUDE_DIR "C:/msys64/mingw64/include")
 set(GTK3_INCLUDE_DIRS "C:/msys64/mingw64/include")
 set(GTK3_LIBRARY_DIRS "C:/msys64/mingw64/lib")
 
-# Set PKG_CONFIG_PATH environment variable
+# Set PKG_CONFIG_PATH environment variablecd
 set(ENV{PKG_CONFIG_PATH} "C:/msys64/mingw64/lib/pkgconfig")
 
 # Include pkg-config module
