@@ -1,28 +1,29 @@
 window {
-    background-image: url('../src/backround.jpg');
+    background-image: url('../src/background_blue.jpg');
     background-repeat: no-repeat; 
     background-size: cover;
 }
 
 
 #find-button {
-    font-size: 30px;
+    font-size: 32px;
     padding: 10px;
     border-radius: 20px;
-    font-family:'Trebuchet MS', Arial, sans-serif,;
+    font-family:'Trebuchet MS', Arial, sans-serif;
+    font-weight: 800;
 }
 
 #quit-button {
-    font-size: 30px;
+    font-size: 25px;
     padding: 10px;
     border-radius: 20px;
     font-family:'Trebuchet MS', Arial, sans-serif;
 }
 
 #header-label {
-    font-size: 75px;
+    font-size: 90px;
     font-family: 'Trebuchet MS', Arial, sans-serif;
-    font-weight: 600;
+    font-weight: 800;
     color: #333333;
 }
 
@@ -31,6 +32,15 @@ window {
     font-size: 40px;
     font-family: 'Trebuchet MS', Arial, sans-serif;
 }
+
+#date-label,
+#temp-label{
+    font-size: 40px;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-weight: 600;
+}
+
+
 
 
 
