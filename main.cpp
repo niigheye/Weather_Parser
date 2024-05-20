@@ -23,9 +23,6 @@ int main(int argc, char **argv)
     AppView::argv = argv;
 
     controller.GetInfo();
-
-    model.m_CreateRequest();
-    model.m_Parse();
     view.ShowInfo();
 
     return 0;

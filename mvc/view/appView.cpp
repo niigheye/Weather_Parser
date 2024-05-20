@@ -1,10 +1,19 @@
 #include "appView.h"
 
+using json=nlohmann::json;
+
 void on_find_clicked(GtkWidget *widget, GtkWidget *entry)
 {
     std::string res = gtk_editable_get_text(GTK_EDITABLE(entry));
-    res = res.substr(0, res.find_first_of(','));
-    std::cout << res;
+    int pos = res.find_first_of(',');
+    std::string city = res.substr(0, pos);
+    std::string state = res.substr(pos+2, res.length() - pos); 
+    if (!(city == WeatherForecastModel::m_GetCity() && state == WeatherForecastModel::m_GetState()))
+    {
+        WeatherForecastModel::m_SetCity(city);
+        WeatherForecastModel::m_SetState(state);
+        WeatherForecastModel::m_GetForecast();
+    }
 }
 
 AppView::AppView(WeatherForecastModel *model)
@@ -13,10 +22,7 @@ AppView::AppView(WeatherForecastModel *model)
     this->model->AddObserver(this);
 }
 
-void AppView::print_hello(GtkWidget *widget, gpointer data)
-{
-    g_print("Hello World\n");
-}
+
 
 void AppView::init_window(GtkWidget *window)
 {
@@ -34,18 +40,23 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     GtkWidget *button_request;
     GtkWidget *vbox;
     GtkWidget *label;
-    GtkWidget *entry;
-    GtkWidget *entry1;
+    GtkWidget *entry_city;
+    GtkWidget *entry_period;
     GtkWidget *city;
     GtkWidget *time;
     GtkWidget *header_label;  
-    GtkEntryCompletion *completion; 
-    GtkEntryCompletion *completion1;
-    GtkWidget *tree_view;
-    GtkTreeModel *completion_model;
-    GtkTreeModel *completion_model1;
-    GtkTreeSelection *tree_selection;
-    GtkTreeIter iter_selected;
+    GtkWidget *forecast_box;  
+    GtkEntryCompletion *completion_period; 
+    GtkEntryCompletion *completion_city;
+    GtkWidget *tree_view_city;
+    GtkWidget *tree_view_period;
+    GtkTreeModel *completion_model_city;
+    GtkTreeModel *completion_model_period;
+    GtkTreeSelection *tree_selection_period;
+    GtkTreeSelection *tree_selection_city;
+    GtkTreeIter iter_selected_city;
+    GtkTreeIter iter_selected_period;
+
 
     /* create a new window, and set its title */
     window = gtk_application_window_new(app);
@@ -95,10 +106,14 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_size_request(button_quit, 80, 40);
 
     
-    completion_model = WeatherForecastModel::create_completion_model();
-    tree_view = gtk_tree_view_new_with_model(completion_model);
-    tree_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
-    gtk_tree_selection_set_mode(tree_selection, GTK_SELECTION_SINGLE);
+    completion_model_city = WeatherForecastModel::create_completion_model();
+    completion_model_period = WeatherForecastModel::create_completion_model();
+    tree_view_city = gtk_tree_view_new_with_model(completion_model_city);
+    tree_view_period = gtk_tree_view_new_with_model(completion_model_period);
+    tree_selection_city = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view_city));
+    tree_selection_period = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view_period));
+    gtk_tree_selection_set_mode(tree_selection_city, GTK_SELECTION_SINGLE);
+    gtk_tree_selection_set_mode(tree_selection_period, GTK_SELECTION_SINGLE);
 //-------------------------------
     //const char* background_file_path = "src/background.jpg";
     //GFile* background_file = g_file_new_for_path(background_file_path);
@@ -109,7 +124,7 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_path(provider, "../src/main.css");
 
- GtkStyleContext *context;
+    GtkStyleContext *context;
 
     context = gtk_widget_get_style_context(button_request);
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -128,49 +143,46 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_margin_bottom(vbox, 18);
     gtk_grid_attach(GTK_GRID(grid), vbox, 2, 2, 2, 1);
 
-    /* Create the second entry with label */
+    /* Create our entry for time */
     time = gtk_label_new("Time:");
     gtk_widget_set_name(time, "time-label");
     gtk_widget_set_margin_end(time,5);
     gtk_widget_set_margin_bottom(time, 15);
     context = gtk_widget_get_style_context(time);
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-
-    
     gtk_grid_attach(GTK_GRID(grid), time, 0, 0, 1, 1);
 
-    entry1 = gtk_entry_new();
-    gtk_grid_attach(GTK_GRID(grid), entry1, 1, 0, 3, 1);
+    entry_period = gtk_entry_new();
+    gtk_grid_attach(GTK_GRID(grid), entry_period, 1, 0, 3, 1);
+    gtk_widget_set_margin_bottom(entry_period, 10);
+    gtk_box_append(GTK_BOX(vbox), entry_period);
+    gtk_widget_set_size_request(entry_period, 20, 10);
 
-    gtk_widget_set_margin_bottom(entry1, 10);
-    gtk_box_append(GTK_BOX(vbox), entry1);
-    gtk_widget_set_size_request(entry1, 20, 10);
-
-    gtk_accessible_update_property(GTK_ACCESSIBLE(entry1),
+    gtk_accessible_update_property(GTK_ACCESSIBLE(entry_period),
                                    GTK_ACCESSIBLE_PROPERTY_AUTOCOMPLETE, GTK_ACCESSIBLE_AUTOCOMPLETE_LIST,
                                    -1);
 
     /* Create the completion object */
-    completion = gtk_entry_completion_new();
+    completion_period = gtk_entry_completion_new();
 
     /* Assign the completion to the entry */
-    gtk_entry_set_completion(GTK_ENTRY(entry1), completion1);
-    g_object_unref(completion1);
+    gtk_entry_set_completion(GTK_ENTRY(entry_period), completion_period);
+    g_object_unref(completion_period);
 
     /* Create a tree model and use it as the completion model */
 
-    gtk_entry_completion_set_model(completion1, completion_model1);
-    g_object_unref(completion_model1);
+    gtk_entry_completion_set_model(completion_period, completion_model_period);
+    g_object_unref(completion_model_period);
 
     /* Use model column 0 as the text column */
-    gtk_entry_completion_set_text_column(completion1, 0);
+    gtk_entry_completion_set_text_column(completion_period, 0);
 
-    gtk_entry_completion_set_inline_completion(completion1, TRUE);
-    gtk_entry_completion_set_inline_selection(completion1, TRUE);
-    gtk_entry_completion_get_popup_set_width(completion1);
+    gtk_entry_completion_set_inline_completion(completion_period, TRUE);
+    gtk_entry_completion_set_inline_selection(completion_period, TRUE);
+    gtk_entry_completion_get_popup_set_width(completion_period);
 
 
-    /* Create our entry */
+    /* Create our entry for city */
 
     city = gtk_label_new("City:");
     gtk_widget_set_name(city, "city-label");
@@ -181,40 +193,40 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
 
-    entry = gtk_entry_new();
-    gtk_grid_attach(GTK_GRID(grid), entry, 1, 1, 3, 1);
+    entry_city = gtk_entry_new();
+    gtk_grid_attach(GTK_GRID(grid), entry_city, 1, 1, 3, 1);
     //gtk_widget_set_margin_top(entry, 10);
-    gtk_widget_set_margin_bottom(entry, 10);
-    gtk_box_append(GTK_BOX(vbox), entry);
+    gtk_widget_set_margin_bottom(entry_city, 10);
+    gtk_box_append(GTK_BOX(vbox), entry_city);
     gtk_widget_set_size_request(button_quit, 20, 10);
 
-    gtk_accessible_update_property(GTK_ACCESSIBLE(entry),
+    gtk_accessible_update_property(GTK_ACCESSIBLE(entry_city),
                                    GTK_ACCESSIBLE_PROPERTY_AUTOCOMPLETE, GTK_ACCESSIBLE_AUTOCOMPLETE_LIST,
                                    -1);
 
     /* Create the completion object */
-    completion = gtk_entry_completion_new();
+    completion_city = gtk_entry_completion_new();
 
     /* Assign the completion to the entry */
-    gtk_entry_set_completion(GTK_ENTRY(entry), completion);
-    g_object_unref(completion);
+    gtk_entry_set_completion(GTK_ENTRY(entry_city), completion_city);
+    g_object_unref(completion_city);
 
     /* Create a tree model and use it as the completion model */
 
-    gtk_entry_completion_set_model(completion, completion_model);
-    g_object_unref(completion_model);
+    gtk_entry_completion_set_model(completion_city, completion_model_city);
+    g_object_unref(completion_model_city);
 
     /* Use model column 0 as the text column */
-    gtk_entry_completion_set_text_column(completion, 0);
+    gtk_entry_completion_set_text_column(completion_city, 0);
 
-    gtk_entry_completion_set_inline_completion(completion, TRUE);
-    gtk_entry_completion_set_inline_selection(completion, TRUE);
-    gtk_entry_completion_get_popup_set_width(completion);
+    gtk_entry_completion_set_inline_completion(completion_city, TRUE);
+    gtk_entry_completion_set_inline_selection(completion_city, TRUE);
+    gtk_entry_completion_get_popup_set_width(completion_city);
     //----------------------------------------------------------------------
    
  
-    g_signal_connect(button_request, "clicked", G_CALLBACK(on_find_clicked), entry1);
-    g_signal_connect(button_request, "clicked", G_CALLBACK(on_find_clicked), entry);
+
+    g_signal_connect(button_request, "clicked", G_CALLBACK(on_find_clicked), entry_city);
     g_signal_connect_swapped(button_quit, "clicked", G_CALLBACK(gtk_window_destroy), window);
 
     header_label = gtk_label_new("Let's check your weather!");
@@ -231,7 +243,44 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     //-------------------------------
 
     gtk_window_present(GTK_WINDOW(window));
+
+    // Simulate loading forecast data from a JSON file
+
+    GtkWidget *forecast_grid = gtk_grid_new();
+
+    std::ifstream ifs("../src/request.json");
+    json forecast_data = json::parse(ifs);
+    display_weather_forecast(forecast_box, forecast_data,forecast_grid);
+    gtk_grid_attach(GTK_GRID(grid),forecast_grid,0,0,1,1 );
 }
+
+void AppView::display_weather_forecast(GtkWidget *container, const json &forecast_data,GtkWidget *forecast_grid)
+{
+    
+    gtk_grid_set_row_spacing(GTK_GRID(forecast_grid), 10);
+    gtk_grid_set_column_spacing(GTK_GRID(forecast_grid), 10);
+
+    int row = 0;
+    for (size_t i = 0; i < 40; i += 8)
+    {
+        const auto &day = forecast_data["list"][i];
+
+        GtkWidget *date_label = gtk_label_new(day["dt"].get<std::string>().c_str());
+        GtkWidget *icon_image = gtk_image_new_from_file((day["weather"][0]["icon"].get<std::string>() + ".png").c_str());
+        std::string temp_text = std::to_string(day["main"]["temp_min"].get<float>()) + " / " + std::to_string(day["main"]["temp_max"].get<float>());
+        GtkWidget *temp_label = gtk_label_new(temp_text.c_str());
+
+       gtk_grid_attach(GTK_GRID(forecast_grid), date_label, 0, row, 1, 1);
+       gtk_grid_attach(GTK_GRID(forecast_grid), icon_image, 1, row, 1, 1);
+       gtk_grid_attach(GTK_GRID(forecast_grid), temp_label, 2, row, 1, 1);
+
+        row++;
+    }
+
+    gtk_box_append(GTK_BOX(container), forecast_grid);
+
+}
+       
 
 void AppView::Update()
 {
