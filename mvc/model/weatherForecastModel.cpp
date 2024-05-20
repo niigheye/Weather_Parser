@@ -1,4 +1,5 @@
 #include "weatherForecastModel.h"
+// ????????? ??????? ??????? Parse ? ?? ???????????
 
 void WeatherForecastModel::m_GetForecast()
 {
@@ -99,11 +100,12 @@ void WeatherForecastModel::m_CreateRequest()
     m_ParseToken();
     // std::cout << "\ni set token to " << m_GetToken() << std::endl;
     _request = std::string("api.openweathermap.org/data/2.5/forecast?"
+
                            "q=" +
                            m_GetCity() +
                            "," + m_GetState() +
                            "&units=" + m_GetUnits() +
-                           "&cnt=" + "9" + // надо умножить спаршенное число на 8n + 1
+                           "&cnt=" + "9" + // надо умножить спаршенное число на 8n + 1                  
                            "&lang=" + m_GetLocal() +
                            "&appid=" + m_GetToken());
 }
@@ -205,6 +207,7 @@ GtkTreeModel *WeatherForecastModel::CreateCompletionModelCity()
     return GTK_TREE_MODEL(store);
 }
 
+
 GtkListStore *WeatherForecastModel::CreateListStorePeriod()
 {
     GtkListStore *store;
@@ -229,3 +232,4 @@ void WeatherForecastModel::FillGtkTreePeriod(GtkListStore *store)
     gtk_list_store_insert_with_values(store, NULL, -1, 1, "3 days", -1);
     gtk_list_store_insert_with_values(store, NULL, -1, 1, "5 days", -1);
 }
+
