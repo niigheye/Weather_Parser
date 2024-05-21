@@ -29,4 +29,5 @@ public:
     static void StyleEntryCompletion(GtkEntryCompletion *completion_city);
     static void activate(GtkApplication *app, gpointer user_data);
     static void display_weather_forecast(GtkWidget *forecast_grid);
+    static void clear_forecast_grid(GtkWidget *forecast_grid);
 };

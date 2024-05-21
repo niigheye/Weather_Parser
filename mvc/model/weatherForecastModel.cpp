@@ -94,10 +94,11 @@ void WeatherForecastModel::m_SetRequest(std::string request)
 
 void WeatherForecastModel::m_SetAnswer(json answer)
 {
-    if (answer.at("cod") != "200"){
+    if (answer.at("cod") != "200")
+    {
         std::cout << answer.at("message");
     }
-        _answer = answer;
+    _answer = answer;
 }
 
 void WeatherForecastModel::Logic()
@@ -115,7 +116,7 @@ void WeatherForecastModel::m_CreateRequest()
                            m_GetCity() +
                            "," + m_GetState() +
                            "&units=" + m_GetUnits() +
-                           "&cnt=" + std::to_string(m_GetDays()*8+1) + // надо умножить спаршенное число на 8n + 1                  
+                           "&cnt=" + std::to_string(m_GetDays() * 8) + // надо умножить спаршенное число на 8n + 1
                            "&lang=" + m_GetLocal() +
                            "&appid=" + m_GetToken());
 }
@@ -217,7 +218,6 @@ GtkTreeModel *WeatherForecastModel::CreateCompletionModelCity()
     return GTK_TREE_MODEL(store);
 }
 
-
 GtkListStore *WeatherForecastModel::CreateListStorePeriod()
 {
     GtkListStore *store;
@@ -242,4 +242,3 @@ void WeatherForecastModel::FillGtkTreePeriod(GtkListStore *store)
     gtk_list_store_insert_with_values(store, NULL, -1, 1, "3 days", -1);
     gtk_list_store_insert_with_values(store, NULL, -1, 1, "5 days", -1);
 }
-

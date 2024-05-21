@@ -22,6 +22,27 @@ void on_find_clicked(GtkWidget *widget, GtkWidget *entry)
     WeatherForecastModel::m_GetForecast();
 }
 
+void AppView::clear_forecast_grid(GtkWidget *forecast_grid)
+{
+    GtkWidget *child = gtk_widget_get_first_child(forecast_grid);
+    while (child != NULL)
+    {
+        GtkWidget *next = gtk_widget_get_next_sibling(child);
+        gtk_grid_remove(GTK_GRID(forecast_grid), child);
+        child = next;
+    }
+}
+
+// void gtk_widget_unparent_children(GtkWidget *widget)
+// {
+//     GList *children = gtk_container_get_children(GTK_CONTAINER(widget));
+//     for (GList *iter = children; iter != nullptr; iter = g_list_next(iter))
+//     {
+//         gtk_widget_unparent(GTK_WIDGET(iter->data));
+//     }
+//     g_list_free(children);
+// }
+
 void on_find_clicked_combo(GtkWidget *widget, GtkComboBox *combo_box)
 {
     int val = gtk_combo_box_get_active(combo_box);
@@ -297,8 +318,10 @@ void AppView::display_weather_forecast(GtkWidget *forecast_grid)
     // }
     if (gtk_grid_get_child_at(GTK_GRID(forecast_grid), 1, 1))
     {
+
         std::cout << "\n HAVE BODY\n";
-        gtk_grid_remove_row(GTK_GRID(forecast_grid), 1);
+
+        clear_forecast_grid(forecast_grid);
     }
     for (size_t i = 0; i < forecast_data["cnt"]; i += 8)
     {
@@ -334,6 +357,16 @@ void AppView::display_weather_forecast(GtkWidget *forecast_grid)
         row++;
     }
 }
+
+// void AppView::clear_forecast_grid(GtkWidget *forecast_grid)
+// {
+//     GList *children = gtk_container_get_children(GTK_CONTAINER(forecast_grid));
+//     for (GList *iter = children; iter != nullptr; iter = g_list_next(iter))
+//     {
+//         gtk_widget_destroy(GTK_WIDGET(iter->data));
+//     }
+//     g_list_free(children);
+// }
 
 void AppView::Update()
 {
