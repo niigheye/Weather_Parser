@@ -37,7 +37,11 @@ void on_find_clicked_combo(GtkWidget *widget, GtkComboBox *combo_box)
     {
         WeatherForecastModel::m_SetDays(5);
     }
-    std::cout << WeatherForecastModel::m_GetDays() << std::endl;
+}
+
+void drawHandler(GtkWidget *widget, GtkWidget *grid)
+{
+    AppView::display_weather_forecast(grid);
 }
 
 AppView::AppView(WeatherForecastModel *model)
@@ -255,12 +259,10 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     gtk_box_append(GTK_BOX(main_vbox), forecast_grid);
 
     // Загрузка данных и отображение прогноза
-    display_weather_forecast(forecast_grid);
 
-    
     g_signal_connect(button_request, "clicked", G_CALLBACK(on_find_clicked_combo), GTK_COMBO_BOX(combo));
     g_signal_connect(button_request, "clicked", G_CALLBACK(on_find_clicked), entry_city);
-    
+    g_signal_connect_after(button_request, "clicked", G_CALLBACK(drawHandler), forecast_grid);
     g_signal_connect_swapped(button_quit, "clicked", G_CALLBACK(gtk_window_destroy), window);
 
     if (!gtk_widget_get_visible(window))
@@ -271,8 +273,12 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
 
 void AppView::display_weather_forecast(GtkWidget *forecast_grid)
 {
+
+    std::ifstream ifs("../src/request.json");
+    json forecast_data = json::parse(ifs);
+    ifs.close();
     int row = 0;
-    json forecast_data = WeatherForecastModel::m_GetAnswer();
+    // json forecast_data = WeatherForecastModel::m_GetAnswer();
     GtkCssProvider *provider1 = gtk_css_provider_new();
     GtkStyleContext *context1;
     GtkWidget *date_label;
@@ -283,8 +289,18 @@ void AppView::display_weather_forecast(GtkWidget *forecast_grid)
     GtkWidget *temp_label;
     GtkWidget *icon_image;
     gtk_css_provider_load_from_path(provider1, "../src/main.css");
-
-    for (size_t i = 0; i < forecast_data["list"]["cnt"]; i += 8)
+    // if (gtk_widget_is_visible(date_label)){
+    //     std::cout << "\nI SEE\n";
+    //     gtk_grid_remove(GTK_GRID(forecast_grid), date_label);
+    //     gtk_grid_remove(GTK_GRID(forecast_grid), icon_image);
+    //     gtk_grid_remove(GTK_GRID(forecast_grid), temp_label);
+    // }
+    if (gtk_grid_get_child_at(GTK_GRID(forecast_grid), 1, 1))
+    {
+        std::cout << "\n HAVE BODY\n";
+        gtk_grid_remove_row(GTK_GRID(forecast_grid), 1);
+    }
+    for (size_t i = 0; i < forecast_data["cnt"]; i += 8)
     {
         const auto &day = forecast_data["list"][i];
 

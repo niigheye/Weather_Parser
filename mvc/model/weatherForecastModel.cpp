@@ -115,7 +115,7 @@ void WeatherForecastModel::m_CreateRequest()
                            m_GetCity() +
                            "," + m_GetState() +
                            "&units=" + m_GetUnits() +
-                           "&cnt=" + "9" + // надо умножить спаршенное число на 8n + 1                  
+                           "&cnt=" + std::to_string(m_GetDays()*8+1) + // надо умножить спаршенное число на 8n + 1                  
                            "&lang=" + m_GetLocal() +
                            "&appid=" + m_GetToken());
 }
