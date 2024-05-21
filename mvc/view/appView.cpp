@@ -18,7 +18,7 @@ void on_find_clicked(GtkWidget *widget, GtkWidget *entry)
     if ((city == WeatherForecastModel::m_GetCity()) && (state == WeatherForecastModel::m_GetState()))
         return;
     WeatherForecastModel::m_SetCity(city);
-    WeatherForecastModel::m_SetState(state);
+    WeatherForecastModel::m_SetState(state);;
     WeatherForecastModel::m_GetForecast();
 }
 
@@ -46,18 +46,25 @@ void AppView::clear_forecast_grid(GtkWidget *forecast_grid)
 void on_find_clicked_combo(GtkWidget *widget, GtkComboBox *combo_box)
 {
     int val = gtk_combo_box_get_active(combo_box);
+    int val_to_set = -1;
     if (val == 0)
     {
-        WeatherForecastModel::m_SetDays(1);
+        val_to_set = 1;
     }
     else if (val == 1)
     {
-        WeatherForecastModel::m_SetDays(3);
+        val_to_set = 3;
     }
     else
     {
-        WeatherForecastModel::m_SetDays(5);
+        val_to_set = 5;
     }
+
+    if (val_to_set != WeatherForecastModel::m_GetDays())
+    {
+        WeatherForecastModel::m_SetReady(1);
+    }
+    WeatherForecastModel::m_SetDays(val_to_set);
 }
 
 void drawHandler(GtkWidget *widget, GtkWidget *grid)

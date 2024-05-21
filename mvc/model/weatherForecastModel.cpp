@@ -42,6 +42,11 @@ std::string WeatherForecastModel::m_GetLocal()
     return _local;
 }
 
+bool WeatherForecastModel::m_GetReady()
+{
+    return _ready_for_request;
+}
+
 int WeatherForecastModel::m_GetDays()
 {
     return _days;
@@ -65,6 +70,11 @@ void WeatherForecastModel::m_SetCity(std::string city)
 void WeatherForecastModel::m_SetDays(int days)
 {
     _days = days;
+}
+
+bool WeatherForecastModel::m_SetReady(bool ready)
+{
+    _ready_for_request = ready;
 }
 
 void WeatherForecastModel::m_SetState(std::string state)
