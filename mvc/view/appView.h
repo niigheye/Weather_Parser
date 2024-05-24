@@ -27,6 +27,7 @@ public:
     static void StyleScrollWindow(GtkWidget *scrolled_window);
     static void StyleForecastGrid(GtkWidget *forecast_grid);
     static void StyleEntryCompletion(GtkEntryCompletion *completion_city);
+    static void StyleForecastScrolledWindow(GtkWidget * forecast_scrolled_window);
     static void activate(GtkApplication *app, gpointer user_data);
 
     //static void display_weather_forecast(GtkWidget *container, const json &forecast_data,GtkWidget *forecast_grid);
