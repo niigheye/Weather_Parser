@@ -6,6 +6,7 @@
 #include <fstream>
 
 using json = nlohmann::json;
+
 void on_find_clicked(GtkWidget *widget, GtkWidget *entry)
 {
     std::string res = gtk_editable_get_text(GTK_EDITABLE(entry));
@@ -19,7 +20,6 @@ void on_find_clicked(GtkWidget *widget, GtkWidget *entry)
         return;
     WeatherForecastModel::m_SetCity(city);
     WeatherForecastModel::m_SetState(state);
-    ;
     WeatherForecastModel::m_GetForecast();
 }
 
@@ -51,16 +51,36 @@ void on_find_clicked_combo(GtkWidget *widget, GtkComboBox *combo_box)
         val_to_set = 5;
     }
 
+    WeatherForecastModel::m_SetReady(false);
     if (val_to_set != WeatherForecastModel::m_GetDays())
     {
-        WeatherForecastModel::m_SetReady(1);
+        WeatherForecastModel::m_SetReady(true);
     }
     WeatherForecastModel::m_SetDays(val_to_set);
 }
 
-void drawHandler(GtkWidget *widget, GtkWidget *grid)
+void drawHandlerNormal(GtkWidget *widget, GtkWidget *grid)
 {
-    AppView::display_weather_forecast(grid);
+    if (WeatherForecastModel::m_GetDays() != 1)
+    {
+        AppView::display_weather_forecast(grid);
+    }
+}
+
+void drawHandlerDaily(GtkWidget *widget, GtkWidget *forecast_grid)
+{
+    if (WeatherForecastModel::m_GetDays() == 1)
+    {
+        AppView::display_weather_forecast_1(forecast_grid);
+    }
+}
+
+void drawHandlerStatic(GtkWidget *widget, GtkWidget *detail_box)
+{
+    if (WeatherForecastModel::m_GetDays() == 1)
+    {
+        AppView::display_static_weather_details_1(detail_box);
+    }
 }
 
 AppView::AppView(WeatherForecastModel *model)
@@ -178,14 +198,14 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     GtkWidget *header_box;
 
     GtkWidget *overlay;
+    GtkWidget *details_box;
+
     //---------------------------------------------------------
     /* create a new window, and set its title */
     window = gtk_application_window_new(app);
     init_window(window);
 
     grid = gtk_grid_new();
-    // gtk_window_set_child(GTK_WINDOW(window), grid);
-
     scrolled_window = gtk_scrolled_window_new();
     button_request = gtk_button_new_with_label("Find");
     button_quit = gtk_button_new_with_label("Quit");
@@ -206,6 +226,7 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     header_label = gtk_label_new("Let's check your weather!");
     forecast_scrolled_window = gtk_scrolled_window_new();
     overlay = gtk_overlay_new();
+    details_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
 
     //------------------------------------------------------------
     gtk_widget_set_name(combo, "combo-dropdown");
@@ -230,23 +251,19 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
 
     gtk_window_set_child(GTK_WINDOW(window), scrolled_window);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window), main_vbox);
-     gtk_overlay_set_child(GTK_OVERLAY(overlay), forecast_scrolled_window);
+    gtk_overlay_set_child(GTK_OVERLAY(overlay), forecast_scrolled_window);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(forecast_scrolled_window), forecast_grid);
     // style forecast_scrolled_window
-   
 
     // gtk_box_append(GTK_BOX(main_vbox), forecast_grid); // тут баг
-
-    gtk_box_append(GTK_BOX(main_vbox), overlay);
-    // Верхняя часть интерфейса
-
     gtk_box_append(GTK_BOX(main_vbox), header_box);
-
-    
+    gtk_box_append(GTK_BOX(main_vbox), overlay);
+    gtk_box_append(GTK_BOX(main_vbox), details_box);
+    // Верхняя часть интерфейса
+    gtk_box_append(GTK_BOX(header_box), header_label);
+    gtk_box_append(GTK_BOX(header_box), grid);
 
     // settings of grid;
-
-    gtk_box_append(GTK_BOX(header_box), grid);
 
     g_object_unref(liststore);
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), column, TRUE);
@@ -278,8 +295,7 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     // display_weather_forecast_1(forecast_grid, forecast_data);
 
     // Добавление контейнера для статичных элементов под forecast_grid
-    GtkWidget *details_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    gtk_box_append(GTK_BOX(main_vbox), details_box);
+
     // display_static_weather_details_1(details_box, forecast_data);
 
     gtk_grid_attach(GTK_GRID(grid), button_request, 1, 2, 1, 1);
@@ -303,19 +319,20 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
     //----------------------------------------------------------------------
 
     gtk_widget_set_halign(header_label, GTK_ALIGN_CENTER);
-    gtk_box_append(GTK_BOX(header_box), header_label);
     //--------------------------------------------
     gtk_widget_set_size_request(entry_city, 250, 70);
     //-----------------------------------
-    
 
     // Загрузка данных и отображение прогноза
 
     g_signal_connect(button_request, "clicked", G_CALLBACK(on_find_clicked_combo), GTK_COMBO_BOX(combo));
     g_signal_connect(button_request, "clicked", G_CALLBACK(on_find_clicked), entry_city);
-    g_signal_connect_after(button_request, "clicked", G_CALLBACK(drawHandler), forecast_grid);
-    g_signal_connect_swapped(button_quit, "clicked", G_CALLBACK(gtk_window_destroy), window);
 
+    g_signal_connect_after(button_request, "clicked", G_CALLBACK(drawHandlerNormal), grid);
+    g_signal_connect_after(button_request, "clicked", G_CALLBACK(drawHandlerDaily), forecast_grid);
+    g_signal_connect_after(button_request, "clicked", G_CALLBACK(drawHandlerStatic), details_box);
+
+    g_signal_connect_swapped(button_quit, "clicked", G_CALLBACK(gtk_window_destroy), window);
 
     if (!gtk_widget_get_visible(window))
         gtk_widget_set_visible(window, TRUE);
@@ -324,8 +341,12 @@ void AppView::activate(GtkApplication *app, gpointer user_data)
 }
 
 //------------------------------ приописываем вывод для 1 дня
-void AppView::display_weather_forecast_1(GtkWidget *forecast_grid, const json &forecast_data)
+void AppView::display_weather_forecast_1(GtkWidget *forecast_grid)
 {
+    std::ifstream ifs("../src/request.json");
+    json forecast_data = json::parse(ifs);
+    ifs.close();
+
     int column = 0;
     GtkWidget *times_row = gtk_grid_new();
     GtkWidget *icon_row = gtk_grid_new();
@@ -427,8 +448,12 @@ void AppView::display_weather_forecast(GtkWidget *forecast_grid)
     }
 }
 
-void AppView::display_static_weather_details_1(GtkWidget *details_box, const json &forecast_data)
+void AppView::display_static_weather_details_1(GtkWidget *details_box)
 {
+    std::ifstream ifs("../src/request.json");
+    json forecast_data = json::parse(ifs);
+    ifs.close();
+
     const auto &current_day = forecast_data["list"][0];
     std::string pressure_text = "Pressure: " + std::to_string(current_day["main"]["pressure"].get<int>()) + " hPa";
     std::string humidity_text = "Humidity: " + std::to_string(current_day["main"]["humidity"].get<int>()) + "%";
@@ -437,18 +462,15 @@ void AppView::display_static_weather_details_1(GtkWidget *details_box, const jso
     std::string wind_speed_text = "Wind speed: " + std::to_string(current_day["wind"]["speed"].get<int>()) + " m/s";
 
     GtkWidget *pressure_label = gtk_label_new(pressure_text.c_str());
-    gtk_widget_set_name(pressure_label, "pressure-label");
-
     GtkWidget *humidity_label = gtk_label_new(humidity_text.c_str());
-    gtk_widget_set_name(humidity_label, "humidity-label");
-
     GtkWidget *feels_like_label = gtk_label_new(feels_like_text.c_str());
-    gtk_widget_set_name(feels_like_label, "feels-like-label");
-
     GtkWidget *weather_desc_label = gtk_label_new(weather_desc_text.c_str());
-    gtk_widget_set_name(weather_desc_label, "weather-desc-label");
-
     GtkWidget *wind_speed_label = gtk_label_new(wind_speed_text.c_str());
+
+    gtk_widget_set_name(pressure_label, "pressure-label");
+    gtk_widget_set_name(humidity_label, "humidity-label");
+    gtk_widget_set_name(feels_like_label, "feels-like-label");
+    gtk_widget_set_name(weather_desc_label, "weather-desc-label");
     gtk_widget_set_name(wind_speed_label, "wind-speed-label");
 
     GtkCssProvider *provider1 = gtk_css_provider_new();

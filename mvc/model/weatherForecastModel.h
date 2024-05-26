@@ -23,7 +23,7 @@ private:
    inline static std::string _local = "ru";
    inline static std::string _request = "";
    inline static int _days = -1;
-   inline static bool _ready_for_request = 0;
+   inline static bool _ready_for_request = false;
    inline static json _answer;
 
 public:
@@ -39,7 +39,7 @@ public:
 
     static void m_SetCity(std::string city);
     static void m_SetDays(int days);
-    static bool m_SetReady(bool ready);
+    static void m_SetReady(bool ready);
     static void m_SetState(std::string state);
     static void m_SetToken(std::string token);
     static void m_SetUnits(std::string units);

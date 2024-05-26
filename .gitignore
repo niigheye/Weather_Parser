@@ -226,4 +226,4 @@ CMakeLists.txt.user*
 .vscode
 token.txt
 build
-request.txt
+request.json

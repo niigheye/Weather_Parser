@@ -72,7 +72,7 @@ void WeatherForecastModel::m_SetDays(int days)
     _days = days;
 }
 
-bool WeatherForecastModel::m_SetReady(bool ready)
+void WeatherForecastModel::m_SetReady(bool ready)
 {
     _ready_for_request = ready;
 }
