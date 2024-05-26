@@ -1,5 +1,29 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <stdbool.h>
+#include <glib/gstdio.h>
+#include <stdio.h>
+#include <errno.h>
+#include <pixman.h>
 
-int main(int, char**){
-    std::cout << "Hello, from aladin_practise_cur1!\n";
+#include "mvc/model/weatherForecastModel.h"
+#include "mvc/view/appView.h"
+#include "mvc/controller/appController.h"
+
+int main(int argc, char **argv)
+{
+    system("chcp 1251>nul");
+
+    WeatherForecastModel model;
+    AppView view(&model);
+    AppController controller(&model);
+
+    AppView::argc = argc;
+    AppView::argv = argv;
+
+    controller.GetInfo();
+    view.ShowInfo();
+
+    return 0;
 }

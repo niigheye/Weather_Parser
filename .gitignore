@@ -136,6 +136,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
+
+/CMakeLists.txt
 ### CMake Patch ###
 # External projects
 *-prefix/
@@ -222,4 +224,6 @@ CMakeLists.txt.user*
 
 # End of https://www.toptal.com/developers/gitignore/api/c++,cmake,visualstudiocode,clion+all,git,qt
 .vscode
+token.txt
 build
+request.json
